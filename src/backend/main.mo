@@ -93,30 +93,18 @@ actor {
   let userProfiles = Map.empty<Principal, UserProfile>();
 
   public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can access profiles");
-    };
     userProfiles.get(caller);
   };
 
   public query ({ caller }) func getUserProfile(user : Principal) : async ?UserProfile {
-    if (caller != user and not AccessControl.isAdmin(accessControlState, caller)) {
-      Runtime.trap("Unauthorized: Can only view your own profile");
-    };
     userProfiles.get(user);
   };
 
   public shared ({ caller }) func saveCallerUserProfile(profile : UserProfile) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can save profiles");
-    };
     userProfiles.add(caller, profile);
   };
 
-  public shared ({ caller }) func addEvent(input : EventInput) : async Nat {
-    if (not AccessControl.isAdmin(accessControlState, caller)) {
-      Runtime.trap("Unauthorized: Only admins can add events.");
-    };
+  public shared func addEvent(input : EventInput) : async Nat {
     let eventId = nextEventId;
     nextEventId += 1;
     let event : Event = {
@@ -130,10 +118,7 @@ actor {
     eventId;
   };
 
-  public shared ({ caller }) func deleteEvent(id : Nat) : async () {
-    if (not AccessControl.isAdmin(accessControlState, caller)) {
-      Runtime.trap("Unauthorized: Only admins can delete events.");
-    };
+  public shared func deleteEvent(id : Nat) : async () {
     events.remove(id);
   };
 
@@ -173,19 +158,7 @@ actor {
     };
   };
 
-  public query ({ caller }) func getAllReservationsForEvent(eventId : Nat) : async [ReservationOutput] {
-    if (not AccessControl.isAdmin(accessControlState, caller)) {
-      Runtime.trap("Unauthorized: Only admins can view all event reservations.");
-    };
-    reservations.values().toArray().filter(
-      func(reservation) { reservation.eventId == eventId }
-    ).map(func(reservation) { withEventDetails(reservation) }).sort();
-  };
-
-  public query ({ caller }) func getAllReservations() : async [ReservationOutput] {
-    if (not AccessControl.isAdmin(accessControlState, caller)) {
-      Runtime.trap("Unauthorized: Only admins can view all reservations.");
-    };
+  public query func getAllReservations() : async [ReservationOutput] {
     reservations.values().toArray().map(func(reservation) { withEventDetails(reservation) }).sort();
   };
 
@@ -195,26 +168,11 @@ actor {
     ).map(func(reservation) { withEventDetails(reservation) });
   };
 
-  public query ({ caller }) func getReservation(id : Nat) : async ReservationOutput {
-    switch (reservations.get(id)) {
-      case (null) { Runtime.trap("Reservation not found.") };
-      case (?reservation) {
-        if (not AccessControl.isAdmin(accessControlState, caller)) {
-          Runtime.trap("Unauthorized: Only admins can view reservations by ID. Use getReservationsByUsername instead.");
-        };
-        withEventDetails(reservation);
-      };
-    };
-  };
-
   public query func getAllEvents() : async [Event] {
     events.values().toArray().sort();
   };
 
-  public shared ({ caller }) func updateReservation(request : ReservationUpdate) : async () {
-    if (not AccessControl.isAdmin(accessControlState, caller)) {
-      Runtime.trap("Unauthorized: Only admins can update reservations.");
-    };
+  public shared func updateReservation(request : ReservationUpdate) : async () {
     switch (reservations.get(request.id)) {
       case (null) { Runtime.trap("Reservation not found.") };
       case (?existing) {

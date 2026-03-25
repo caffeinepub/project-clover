@@ -1,5 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { EventInput, ReservationUpdate } from "../backend";
+import { createActorWithConfig } from "../config";
 import { useActor } from "./useActor";
 
 export function useGetAllEvents() {
@@ -63,8 +64,12 @@ export function useSubmitReservation() {
       imvuUsername: string;
       transactionNote: string;
     }) => {
-      if (!actor) throw new Error("Not connected");
-      return actor.submitReservation(eventId, imvuUsername, transactionNote);
+      const resolvedActor = actor ?? (await createActorWithConfig());
+      return resolvedActor.submitReservation(
+        eventId,
+        imvuUsername,
+        transactionNote,
+      );
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["allReservations"] });
@@ -77,8 +82,8 @@ export function useUpdateReservation() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (request: ReservationUpdate) => {
-      if (!actor) throw new Error("Not connected");
-      return actor.updateReservation(request);
+      const resolvedActor = actor ?? (await createActorWithConfig());
+      return resolvedActor.updateReservation(request);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["allReservations"] });
@@ -91,8 +96,8 @@ export function useAddEvent() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (input: EventInput) => {
-      if (!actor) throw new Error("Not connected");
-      return actor.addEvent(input);
+      const resolvedActor = actor ?? (await createActorWithConfig());
+      return resolvedActor.addEvent(input);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["getAllEvents"] });
@@ -105,8 +110,8 @@ export function useDeleteEvent() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (id: bigint) => {
-      if (!actor) throw new Error("Not connected");
-      return actor.deleteEvent(id);
+      const resolvedActor = actor ?? (await createActorWithConfig());
+      return resolvedActor.deleteEvent(id);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["getAllEvents"] });

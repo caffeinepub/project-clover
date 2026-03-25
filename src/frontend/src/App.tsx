@@ -16,10 +16,10 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   CalendarDays,
   Loader2,
-  LogOut,
   MapPin,
   Plus,
   Search,
+  Settings,
   ShieldCheck,
   Ticket,
   Trash2,
@@ -29,14 +29,13 @@ import { useState } from "react";
 import { toast } from "sonner";
 import type { Event, ReservationOutput } from "./backend";
 import { ReservationStatus } from "./backend";
+import { SplashScreen } from "./components/SplashScreen";
 import { useActor } from "./hooks/useActor";
-import { useInternetIdentity } from "./hooks/useInternetIdentity";
 import {
   useAddEvent,
   useDeleteEvent,
   useGetAllEvents,
   useGetAllReservations,
-  useIsCallerAdmin,
   useSubmitReservation,
   useUpdateReservation,
 } from "./hooks/useQueries";
@@ -52,6 +51,19 @@ function formatDateTime(t: bigint): string {
     hour: "numeric",
     minute: "2-digit",
   });
+}
+
+function formatDateShort(t: bigint): { date: string; time: string } {
+  const ms = Number(t / 1_000_000n);
+  const d = new Date(ms);
+  return {
+    date: d.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    }),
+    time: d.toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit" }),
+  };
 }
 
 function StatusBadge({ status }: { status: ReservationStatus }) {
@@ -76,7 +88,7 @@ function StatusBadge({ status }: { status: ReservationStatus }) {
   );
 }
 
-// ── Event Card ──────────────────────────────────────────────────────────
+// ── Event Card (Ticket Design) ──────────────────────────────────────────
 function EventCard({
   event,
   onReserve,
@@ -84,44 +96,225 @@ function EventCard({
   event: Event;
   onReserve: (e: Event) => void;
 }) {
+  const { date, time } = formatDateShort(event.date);
+  const ticketNum = `#${String(Number(event.id)).padStart(4, "0")}`;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.3 }}
+      whileHover={{ y: -3, transition: { duration: 0.15 } }}
     >
-      <Card className="bg-card border border-border hover:shadow-glow transition-shadow duration-300">
-        <CardHeader className="pb-2">
-          <div className="flex items-center gap-2 mb-1">
-            <span className="text-xs font-semibold uppercase tracking-wider text-primary/70 bg-primary/10 px-2 py-0.5 rounded-full border border-primary/20">
-              🎟 Ticket
+      {/* Outer wrapper applies the notch cutouts */}
+      <div
+        className="relative flex rounded-xl overflow-visible"
+        style={{
+          filter: "drop-shadow(0 4px 24px oklch(0.79 0.21 142 / 0.18))",
+        }}
+      >
+        {/* Main ticket body */}
+        <div
+          className="flex-1 relative overflow-hidden"
+          style={{
+            background: "oklch(0.13 0.015 142)",
+            borderRadius: "12px 0 0 12px",
+            border: "1px solid oklch(0.79 0.21 142 / 0.35)",
+            borderRight: "none",
+          }}
+        >
+          {/* Ticket paper texture pattern */}
+          <div
+            className="absolute inset-0 pointer-events-none opacity-[0.04]"
+            style={{
+              backgroundImage:
+                "repeating-linear-gradient(45deg, oklch(0.79 0.21 142) 0px, oklch(0.79 0.21 142) 1px, transparent 1px, transparent 8px)," +
+                "repeating-linear-gradient(-45deg, oklch(0.79 0.21 142) 0px, oklch(0.79 0.21 142) 1px, transparent 1px, transparent 8px)",
+            }}
+          />
+
+          {/* Green glow top-left accent */}
+          <div
+            className="absolute -top-6 -left-6 w-24 h-24 rounded-full pointer-events-none"
+            style={{
+              background:
+                "radial-gradient(circle, oklch(0.79 0.21 142 / 0.12) 0%, transparent 70%)",
+            }}
+          />
+
+          <div className="p-5 pr-6">
+            {/* Top row: badge + ticket number */}
+            <div className="flex items-center justify-between mb-3">
+              <span
+                className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full"
+                style={{
+                  background: "oklch(0.79 0.21 142 / 0.15)",
+                  color: "oklch(0.79 0.21 142)",
+                  border: "1px solid oklch(0.79 0.21 142 / 0.3)",
+                }}
+              >
+                🍀 IMVU Event
+              </span>
+              <span
+                className="text-[10px] font-mono"
+                style={{ color: "oklch(0.55 0 0)" }}
+              >
+                {ticketNum}
+              </span>
+            </div>
+
+            {/* Event title */}
+            <h3
+              className="text-xl font-bold leading-tight mb-4"
+              style={{ color: "oklch(0.96 0 0)" }}
+            >
+              {event.title}
+            </h3>
+
+            {/* Date + Location row */}
+            <div className="flex flex-col gap-1.5 mb-5">
+              <div className="flex items-center gap-2">
+                <CalendarDays
+                  className="w-3.5 h-3.5 shrink-0"
+                  style={{ color: "oklch(0.79 0.21 142)" }}
+                />
+                <span className="text-xs" style={{ color: "oklch(0.65 0 0)" }}>
+                  {date}{" "}
+                  <span
+                    className="font-semibold"
+                    style={{ color: "oklch(0.82 0.1 142)" }}
+                  >
+                    @ {time}
+                  </span>
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                <MapPin
+                  className="w-3.5 h-3.5 shrink-0"
+                  style={{ color: "oklch(0.79 0.21 142)" }}
+                />
+                <span className="text-xs" style={{ color: "oklch(0.65 0 0)" }}>
+                  {event.location}
+                </span>
+              </div>
+            </div>
+
+            {/* Price + CTA */}
+            <div className="flex items-center justify-between gap-3">
+              <div>
+                <p
+                  className="text-[10px] uppercase tracking-wider mb-0.5"
+                  style={{ color: "oklch(0.5 0 0)" }}
+                >
+                  Price
+                </p>
+                <p
+                  className="text-lg font-bold"
+                  style={{ color: "oklch(0.79 0.21 142)" }}
+                >
+                  {event.price === 0n
+                    ? "Free"
+                    : `${event.price.toString()} credits`}
+                </p>
+              </div>
+              <Button
+                type="button"
+                className="font-semibold text-sm px-5 py-2 rounded-lg"
+                style={{
+                  background: "oklch(0.79 0.21 142)",
+                  color: "oklch(0.06 0 0)",
+                }}
+                onClick={() => onReserve(event)}
+                data-ocid="events.reserve.button"
+              >
+                <Ticket className="w-4 h-4 mr-1.5" />
+                Reserve
+              </Button>
+            </div>
+          </div>
+        </div>
+
+        {/* Perforation notch top */}
+        <div
+          className="absolute z-10"
+          style={{
+            left: "calc(100% - 72px - 6px)",
+            top: "-8px",
+            width: "16px",
+            height: "16px",
+            borderRadius: "50%",
+            background: "oklch(0.06 0 0)",
+            border: "1px solid oklch(0.12 0 0)",
+          }}
+        />
+        {/* Perforation notch bottom */}
+        <div
+          className="absolute z-10"
+          style={{
+            left: "calc(100% - 72px - 6px)",
+            bottom: "-8px",
+            width: "16px",
+            height: "16px",
+            borderRadius: "50%",
+            background: "oklch(0.06 0 0)",
+            border: "1px solid oklch(0.12 0 0)",
+          }}
+        />
+
+        {/* Stub section */}
+        <div
+          className="w-[72px] shrink-0 flex flex-col items-center justify-between relative overflow-hidden"
+          style={{
+            background: "oklch(0.11 0.018 142)",
+            borderRadius: "0 12px 12px 0",
+            border: "1px solid oklch(0.79 0.21 142 / 0.35)",
+            borderLeft: "none",
+          }}
+        >
+          {/* Dashed divider */}
+          <div
+            className="absolute left-0 top-4 bottom-4"
+            style={{
+              borderLeft: "2px dashed oklch(0.79 0.21 142 / 0.3)",
+            }}
+          />
+
+          {/* Stub glow */}
+          <div
+            className="absolute inset-0 pointer-events-none"
+            style={{
+              background:
+                "radial-gradient(ellipse at center, oklch(0.79 0.21 142 / 0.07) 0%, transparent 70%)",
+            }}
+          />
+
+          {/* Rotated ADMIT ONE text */}
+          <div
+            className="flex-1 flex items-center justify-center"
+            style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
+          >
+            <span
+              className="text-[9px] font-bold uppercase tracking-[0.25em]"
+              style={{ color: "oklch(0.79 0.21 142 / 0.7)" }}
+            >
+              ADMIT ONE
             </span>
           </div>
-          <CardTitle className="text-foreground text-xl font-bold">
-            {event.title}
-          </CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          <div className="flex items-center gap-2 text-muted-foreground text-sm">
-            <CalendarDays className="w-4 h-4 text-primary" />
-            <span>{formatDateTime(event.date)}</span>
+
+          {/* Clover icon */}
+          <div className="pb-4 text-xl">🍀</div>
+
+          {/* Ticket ID at bottom */}
+          <div className="pb-3">
+            <span
+              className="text-[8px] font-mono block text-center"
+              style={{ color: "oklch(0.45 0 0)", letterSpacing: "0.05em" }}
+            >
+              {ticketNum}
+            </span>
           </div>
-          <div className="flex items-center gap-2 text-muted-foreground text-sm">
-            <MapPin className="w-4 h-4 text-primary" />
-            <span>{event.location}</span>
-          </div>
-          <p className="text-primary font-bold text-lg mt-2">{event.price}</p>
-          <Button
-            type="button"
-            className="w-full mt-3 bg-primary text-primary-foreground hover:bg-primary/90 font-semibold"
-            onClick={() => onReserve(event)}
-            data-ocid="events.reserve.button"
-          >
-            <Ticket className="w-4 h-4 mr-2" />
-            Reserve Ticket
-          </Button>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
     </motion.div>
   );
 }
@@ -131,10 +324,12 @@ function ReservationForm({
   event,
   onSuccess,
   onBack,
+  recipientUsername,
 }: {
   event: Event;
   onSuccess: () => void;
   onBack: () => void;
+  recipientUsername: string;
 }) {
   const [imvuUsername, setImvuUsername] = useState("");
   const [transactionNote, setTransactionNote] = useState("");
@@ -187,7 +382,9 @@ function ReservationForm({
           <p className="text-muted-foreground text-sm">
             {formatDateTime(event.date)} · {event.location}
           </p>
-          <p className="text-primary font-bold text-lg">{event.price}</p>
+          <p className="text-primary font-bold text-lg">
+            {event.price === 0n ? "Free" : `${event.price.toString()} credits`}
+          </p>
         </CardContent>
       </Card>
 
@@ -197,7 +394,7 @@ function ReservationForm({
         </p>
         <p className="text-sm text-foreground">
           Send credits via IMVU to:{" "}
-          <span className="font-bold text-primary">Iluvlean</span>
+          <span className="font-bold text-primary">{recipientUsername}</span>
         </p>
         <p className="text-sm text-foreground">
           Include note:{" "}
@@ -412,22 +609,39 @@ function ManageEventsTab() {
       toast.error("Please fill in all fields");
       return;
     }
+    const priceTrimmed = price.trim();
+    let priceBigInt: bigint;
+    if (priceTrimmed.toLowerCase() === "free") {
+      priceBigInt = 0n;
+    } else {
+      const parsed = Number.parseInt(priceTrimmed, 10);
+      if (Number.isNaN(parsed) || parsed < 0) {
+        toast.error("Price must be a number (e.g. 500) or 'Free'");
+        return;
+      }
+      priceBigInt = BigInt(parsed);
+    }
+    const parsedDate = new Date(dateTime);
+    if (Number.isNaN(parsedDate.getTime())) {
+      toast.error("Please enter a valid date and time");
+      return;
+    }
     try {
-      const dateNs = BigInt(new Date(dateTime).getTime()) * 1_000_000n;
+      const dateNs = BigInt(parsedDate.getTime()) * 1_000_000n;
       await addEvent({
         title: title.trim(),
         date: dateNs,
         location: location.trim(),
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        price: price.trim() as any,
+        price: priceBigInt,
       });
       toast.success("Event uploaded! It's now visible to everyone.");
       setTitle("");
       setDateTime("");
       setLocation("");
       setPrice("");
-    } catch {
-      toast.error("Failed to upload event. Please try again.");
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      toast.error(`Upload failed: ${message}`);
     }
   };
 
@@ -513,7 +727,7 @@ function ManageEventsTab() {
               </label>
               <Input
                 id="event-price"
-                placeholder="e.g. 500 credits"
+                placeholder="e.g. 500 or Free"
                 value={price}
                 onChange={(e) => setPrice(e.target.value)}
                 className="bg-input border-border text-foreground placeholder:text-muted-foreground"
@@ -583,7 +797,11 @@ function ManageEventsTab() {
                     </p>
                     <p className="text-muted-foreground text-xs mt-0.5">
                       {formatDateTime(event.date)} · {event.location} ·{" "}
-                      <span className="text-primary">{event.price}</span>
+                      <span className="text-primary">
+                        {event.price === 0n
+                          ? "Free"
+                          : `${event.price.toString()} credits`}
+                      </span>
                     </p>
                   </div>
                   <Button
@@ -612,8 +830,55 @@ function ManageEventsTab() {
   );
 }
 
+// ── Recipient Username Input ──────────────────────────────────────────────
+function RecipientUsernameInput({
+  recipientUsername,
+  onRecipientChange,
+}: {
+  recipientUsername: string;
+  onRecipientChange: (v: string) => void;
+}) {
+  const [localRecipient, setLocalRecipient] = useState(recipientUsername);
+
+  const handleDone = () => {
+    onRecipientChange(localRecipient);
+    localStorage.setItem("imvuRecipient", localRecipient);
+    toast.success("Recipient username saved!");
+  };
+
+  return (
+    <>
+      <Input
+        id="recipient-username"
+        placeholder="e.g. Iluvlean"
+        value={localRecipient}
+        onChange={(e) => setLocalRecipient(e.target.value)}
+        className="bg-input border-border text-foreground placeholder:text-muted-foreground"
+        data-ocid="admin.recipient_username.input"
+      />
+      <Button
+        type="button"
+        onClick={handleDone}
+        className="mt-2 bg-primary text-primary-foreground hover:bg-primary/90 w-full"
+        data-ocid="admin.recipient_done.button"
+      >
+        Done
+      </Button>
+      <p className="text-xs text-muted-foreground mt-2">
+        Users will be instructed to send credits to this username.
+      </p>
+    </>
+  );
+}
+
 // ── Admin Panel ───────────────────────────────────────────────────────────
-function AdminPanel() {
+function AdminPanel({
+  recipientUsername,
+  onRecipientChange,
+}: {
+  recipientUsername: string;
+  onRecipientChange: (v: string) => void;
+}) {
   const { data: reservations, isLoading } = useGetAllReservations();
   const { mutateAsync: updateRes } = useUpdateReservation();
   const [updating, setUpdating] = useState<string | null>(null);
@@ -656,6 +921,13 @@ function AdminPanel() {
             data-ocid="admin.reservations.tab"
           >
             Reservations
+          </TabsTrigger>
+          <TabsTrigger
+            value="settings"
+            className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary"
+            data-ocid="admin.settings.tab"
+          >
+            Settings
           </TabsTrigger>
         </TabsList>
 
@@ -783,6 +1055,31 @@ function AdminPanel() {
             </div>
           )}
         </TabsContent>
+
+        <TabsContent value="settings">
+          <Card className="bg-card border border-border max-w-lg">
+            <CardHeader className="pb-3">
+              <CardTitle className="text-foreground text-lg flex items-center gap-2">
+                <Settings className="w-5 h-5 text-primary" />
+                Payment Settings
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div>
+                <label
+                  htmlFor="recipient-username"
+                  className="text-sm text-muted-foreground mb-1 block"
+                >
+                  IMVU Recipient Username
+                </label>
+                <RecipientUsernameInput
+                  recipientUsername={recipientUsername}
+                  onRecipientChange={onRecipientChange}
+                />
+              </div>
+            </CardContent>
+          </Card>
+        </TabsContent>
       </Tabs>
     </motion.div>
   );
@@ -790,13 +1087,16 @@ function AdminPanel() {
 
 // ── Root App ─────────────────────────────────────────────────────────────
 export default function App() {
+  const [showSplash, setShowSplash] = useState(true);
   const [view, setView] = useState<View>("events");
   const [selectedEvent, setSelectedEvent] = useState<Event | null>(null);
-  const { login, clear, loginStatus, identity } = useInternetIdentity();
+  const [adminUnlocked, setAdminUnlocked] = useState(false);
+  const [adminCodeInput, setAdminCodeInput] = useState("");
+  const [showAdminPrompt, setShowAdminPrompt] = useState(false);
+  const [recipientUsername, setRecipientUsername] = useState(() => {
+    return localStorage.getItem("imvuRecipient") || "Iluvlean";
+  });
   const { data: events, isLoading: eventsLoading } = useGetAllEvents();
-  const { data: isAdmin } = useIsCallerAdmin();
-
-  const isLoggedIn = loginStatus === "success" && !!identity;
 
   const handleReserve = (event: Event) => {
     setSelectedEvent(event);
@@ -808,15 +1108,100 @@ export default function App() {
     setView("events");
   };
 
-  const navItems: { id: View; label: string }[] = [
+  const handleAdminNavClick = () => {
+    if (adminUnlocked) {
+      setView("admin");
+    } else {
+      setShowAdminPrompt(true);
+    }
+  };
+
+  const handleAdminCode = () => {
+    if (adminCodeInput === "clover2041") {
+      setAdminUnlocked(true);
+      setShowAdminPrompt(false);
+      setAdminCodeInput("");
+      setView("admin");
+    } else {
+      toast.error("Incorrect access code");
+      setAdminCodeInput("");
+    }
+  };
+
+  const navItems: { id: View; label: string; onClick?: () => void }[] = [
     { id: "events", label: "Events" },
     { id: "lookup", label: "My Reservation" },
-    ...(isAdmin ? [{ id: "admin" as View, label: "Admin" }] : []),
+    { id: "admin", label: "Admin", onClick: handleAdminNavClick },
   ];
 
   return (
     <div className="min-h-screen bg-background text-foreground flex flex-col">
+      <AnimatePresence>
+        {showSplash && <SplashScreen onDone={() => setShowSplash(false)} />}
+      </AnimatePresence>
       <Toaster theme="dark" />
+
+      {/* Admin Code Modal */}
+      <AnimatePresence>
+        {showAdminPrompt && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm"
+            data-ocid="admin.modal"
+          >
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95, y: 10 }}
+              animate={{ opacity: 1, scale: 1, y: 0 }}
+              exit={{ opacity: 0, scale: 0.95, y: 10 }}
+              className="bg-card border border-border rounded-xl p-6 w-full max-w-sm mx-4 shadow-2xl"
+            >
+              <div className="flex items-center gap-2 mb-4">
+                <ShieldCheck className="w-5 h-5 text-primary" />
+                <h2 className="text-lg font-bold text-foreground">
+                  Admin Access
+                </h2>
+              </div>
+              <p className="text-sm text-muted-foreground mb-4">
+                Enter the access code to continue.
+              </p>
+              <Input
+                type="password"
+                placeholder="Access code"
+                value={adminCodeInput}
+                onChange={(e) => setAdminCodeInput(e.target.value)}
+                onKeyDown={(e) => e.key === "Enter" && handleAdminCode()}
+                className="bg-input border-border text-foreground placeholder:text-muted-foreground mb-4"
+                autoFocus
+                data-ocid="admin.input"
+              />
+              <div className="flex gap-2">
+                <Button
+                  type="button"
+                  className="flex-1 bg-primary text-primary-foreground hover:bg-primary/90 font-semibold"
+                  onClick={handleAdminCode}
+                  data-ocid="admin.confirm_button"
+                >
+                  Enter
+                </Button>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  className="flex-1 text-muted-foreground hover:text-foreground"
+                  onClick={() => {
+                    setShowAdminPrompt(false);
+                    setAdminCodeInput("");
+                  }}
+                  data-ocid="admin.cancel_button"
+                >
+                  Cancel
+                </Button>
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
       {/* Header */}
       <header className="border-b border-border/50 backdrop-blur-sm sticky top-0 z-10 bg-background/90">
@@ -839,7 +1224,7 @@ export default function App() {
               <button
                 type="button"
                 key={item.id}
-                onClick={() => setView(item.id)}
+                onClick={item.onClick ?? (() => setView(item.id))}
                 className={`px-4 py-2 rounded-md text-sm font-medium transition-colors ${
                   view === item.id
                     ? "bg-primary/20 text-primary"
@@ -852,39 +1237,7 @@ export default function App() {
             ))}
           </nav>
 
-          <div className="flex items-center gap-2">
-            {isLoggedIn ? (
-              <div className="flex items-center gap-2">
-                <span className="text-xs text-muted-foreground hidden sm:block">
-                  {identity.getPrincipal().toString().slice(0, 10)}...
-                </span>
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  onClick={clear}
-                  className="text-muted-foreground hover:text-foreground"
-                  data-ocid="nav.logout.button"
-                >
-                  <LogOut className="w-4 h-4" />
-                </Button>
-              </div>
-            ) : (
-              <Button
-                type="button"
-                size="sm"
-                onClick={login}
-                className="bg-primary text-primary-foreground hover:bg-primary/90"
-                disabled={loginStatus === "logging-in"}
-                data-ocid="nav.login.button"
-              >
-                {loginStatus === "logging-in" ? (
-                  <Loader2 className="w-3 h-3 mr-1 animate-spin" />
-                ) : null}
-                Login
-              </Button>
-            )}
-          </div>
+          <div className="w-10" />
         </div>
 
         {/* Mobile nav */}
@@ -893,7 +1246,7 @@ export default function App() {
             <button
               type="button"
               key={item.id}
-              onClick={() => setView(item.id)}
+              onClick={item.onClick ?? (() => setView(item.id))}
               className={`flex-1 py-2 text-xs font-medium transition-colors ${
                 view === item.id
                   ? "text-primary border-b-2 border-primary"
@@ -928,7 +1281,7 @@ export default function App() {
 
               {eventsLoading && (
                 <div
-                  className="grid grid-cols-1 md:grid-cols-2 gap-4"
+                  className="grid grid-cols-1 md:grid-cols-2 gap-6"
                   data-ocid="events.loading_state"
                 >
                   {[1, 2, 3, 4].map((i) => (
@@ -951,7 +1304,7 @@ export default function App() {
               )}
 
               {!eventsLoading && events && events.length > 0 && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                   {events.map((event) => (
                     <EventCard
                       key={event.id.toString()}
@@ -975,6 +1328,7 @@ export default function App() {
                 event={selectedEvent}
                 onSuccess={() => setView("confirm")}
                 onBack={handleBack}
+                recipientUsername={recipientUsername}
               />
             </motion.div>
           )}
@@ -1001,14 +1355,17 @@ export default function App() {
             </motion.div>
           )}
 
-          {view === "admin" && isAdmin && (
+          {view === "admin" && adminUnlocked && (
             <motion.div
               key="admin"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
             >
-              <AdminPanel />
+              <AdminPanel
+                recipientUsername={recipientUsername}
+                onRecipientChange={setRecipientUsername}
+              />
             </motion.div>
           )}
         </AnimatePresence>

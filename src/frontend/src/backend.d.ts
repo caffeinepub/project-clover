@@ -11,7 +11,7 @@ export type Time = bigint;
 export interface EventInput {
     title: string;
     date: bigint;
-    price: string;
+    price: bigint;
     location: string;
 }
 export interface ReservationUpdate {
@@ -22,7 +22,7 @@ export interface Event {
     id: bigint;
     title: string;
     date: bigint;
-    price: string;
+    price: bigint;
     location: string;
 }
 export interface UserProfile {
