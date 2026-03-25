@@ -1,0 +1,58 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@font-face {
+  font-family: "Bricolage Grotesque";
+  src: url("/assets/fonts/BricolageGrotesque.woff2") format("woff2");
+  font-weight: 200 800;
+  font-display: swap;
+}
+
+@layer base {
+  :root {
+    --radius: 0.5rem;
+    /* Black background nightclub theme */
+    --background: 0.06 0 0;
+    --foreground: 0.96 0 0;
+    --card: 0.11 0 0;
+    --card-foreground: 0.96 0 0;
+    --popover: 0.11 0 0;
+    --popover-foreground: 0.96 0 0;
+    /* primary = green-400 #4ade80 */
+    --primary: 0.79 0.21 142;
+    --primary-foreground: 0.06 0 0;
+    --secondary: 0.16 0 0;
+    --secondary-foreground: 0.96 0 0;
+    --muted: 0.14 0 0;
+    --muted-foreground: 0.55 0 0;
+    --accent: 0.79 0.21 142;
+    --accent-foreground: 0.06 0 0;
+    --destructive: 0.63 0.22 25;
+    --destructive-foreground: 0.96 0 0;
+    --border: 0.72 0.21 142 / 40%;
+    --input: 0.18 0 0;
+    --ring: 0.79 0.21 142;
+    --chart-1: 0.79 0.21 142;
+    --chart-2: 0.72 0.18 160;
+    --chart-3: 0.65 0.15 180;
+    --chart-4: 0.85 0.18 100;
+    --chart-5: 0.6 0.2 120;
+    --sidebar: 0.09 0 0;
+    --sidebar-foreground: 0.96 0 0;
+    --sidebar-primary: 0.79 0.21 142;
+    --sidebar-primary-foreground: 0.06 0 0;
+    --sidebar-accent: 0.14 0 0;
+    --sidebar-accent-foreground: 0.96 0 0;
+    --sidebar-border: 0.72 0.21 142 / 30%;
+    --sidebar-ring: 0.79 0.21 142;
+  }
+
+  * {
+    @apply border-border;
+  }
+  body {
+    @apply bg-background text-foreground;
+    font-family: "Bricolage Grotesque", "General Sans", system-ui, sans-serif;
+  }
+}
