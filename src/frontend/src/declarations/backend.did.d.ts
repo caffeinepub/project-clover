@@ -13,8 +13,14 @@ import type { Principal } from '@icp-sdk/core/principal';
 export interface Event {
   'id' : bigint,
   'title' : string,
-  'date' : Time,
-  'price' : string,
+  'date' : bigint,
+  'price' : bigint,
+  'location' : string,
+}
+export interface EventInput {
+  'title' : string,
+  'date' : bigint,
+  'price' : bigint,
   'location' : string,
 }
 export interface ReservationOutput {
@@ -40,10 +46,15 @@ export type UserRole = { 'admin' : null } |
   { 'guest' : null };
 export interface _SERVICE {
   '_initializeAccessControlWithSecret' : ActorMethod<[string], undefined>,
+  'addEvent' : ActorMethod<[EventInput], bigint>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
-  'getAllEventReservations' : ActorMethod<[bigint], Array<ReservationOutput>>,
+  'deleteEvent' : ActorMethod<[bigint], undefined>,
   'getAllEvents' : ActorMethod<[], Array<Event>>,
   'getAllReservations' : ActorMethod<[], Array<ReservationOutput>>,
+  'getAllReservationsForEvent' : ActorMethod<
+    [bigint],
+    Array<ReservationOutput>
+  >,
   'getCallerUserProfile' : ActorMethod<[], [] | [UserProfile]>,
   'getCallerUserRole' : ActorMethod<[], UserRole>,
   'getReservation' : ActorMethod<[bigint], ReservationOutput>,

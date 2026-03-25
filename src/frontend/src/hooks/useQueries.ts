@@ -1,11 +1,11 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import type { ReservationUpdate } from "../backend";
+import type { EventInput, ReservationUpdate } from "../backend";
 import { useActor } from "./useActor";
 
 export function useGetAllEvents() {
   const { actor, isFetching } = useActor();
   return useQuery({
-    queryKey: ["events"],
+    queryKey: ["getAllEvents"],
     queryFn: async () => {
       if (!actor) return [];
       return actor.getAllEvents();
@@ -82,6 +82,34 @@ export function useUpdateReservation() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["allReservations"] });
+    },
+  });
+}
+
+export function useAddEvent() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (input: EventInput) => {
+      if (!actor) throw new Error("Not connected");
+      return actor.addEvent(input);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["getAllEvents"] });
+    },
+  });
+}
+
+export function useDeleteEvent() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (id: bigint) => {
+      if (!actor) throw new Error("Not connected");
+      return actor.deleteEvent(id);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["getAllEvents"] });
     },
   });
 }

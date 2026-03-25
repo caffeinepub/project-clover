@@ -12,14 +12,17 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import {
   CalendarDays,
   Loader2,
   LogOut,
   MapPin,
+  Plus,
   Search,
   ShieldCheck,
   Ticket,
+  Trash2,
 } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
@@ -29,6 +32,8 @@ import { ReservationStatus } from "./backend";
 import { useActor } from "./hooks/useActor";
 import { useInternetIdentity } from "./hooks/useInternetIdentity";
 import {
+  useAddEvent,
+  useDeleteEvent,
   useGetAllEvents,
   useGetAllReservations,
   useIsCallerAdmin,
@@ -38,12 +43,14 @@ import {
 
 type View = "events" | "reserve" | "confirm" | "lookup" | "admin";
 
-function formatTime(t: bigint): string {
+function formatDateTime(t: bigint): string {
   const ms = Number(t / 1_000_000n);
-  return new Date(ms).toLocaleDateString("en-US", {
+  return new Date(ms).toLocaleString("en-US", {
     month: "long",
     day: "numeric",
     year: "numeric",
+    hour: "numeric",
+    minute: "2-digit",
   });
 }
 
@@ -85,6 +92,11 @@ function EventCard({
     >
       <Card className="bg-card border border-border hover:shadow-glow transition-shadow duration-300">
         <CardHeader className="pb-2">
+          <div className="flex items-center gap-2 mb-1">
+            <span className="text-xs font-semibold uppercase tracking-wider text-primary/70 bg-primary/10 px-2 py-0.5 rounded-full border border-primary/20">
+              🎟 Ticket
+            </span>
+          </div>
           <CardTitle className="text-foreground text-xl font-bold">
             {event.title}
           </CardTitle>
@@ -92,7 +104,7 @@ function EventCard({
         <CardContent className="space-y-2">
           <div className="flex items-center gap-2 text-muted-foreground text-sm">
             <CalendarDays className="w-4 h-4 text-primary" />
-            <span>{formatTime(event.date)}</span>
+            <span>{formatDateTime(event.date)}</span>
           </div>
           <div className="flex items-center gap-2 text-muted-foreground text-sm">
             <MapPin className="w-4 h-4 text-primary" />
@@ -173,7 +185,7 @@ function ReservationForm({
         <CardContent className="p-4 space-y-1">
           <p className="text-foreground font-semibold">{event.title}</p>
           <p className="text-muted-foreground text-sm">
-            {formatTime(event.date)} · {event.location}
+            {formatDateTime(event.date)} · {event.location}
           </p>
           <p className="text-primary font-bold text-lg">{event.price}</p>
         </CardContent>
@@ -366,7 +378,7 @@ function LookupView() {
                       {r.eventDetails.title}
                     </p>
                     <p className="text-sm text-muted-foreground mt-1">
-                      {formatTime(r.eventDetails.date)} ·{" "}
+                      {formatDateTime(r.eventDetails.date)} ·{" "}
                       {r.eventDetails.location}
                     </p>
                     <p className="text-xs text-muted-foreground mt-1">
@@ -381,6 +393,222 @@ function LookupView() {
         </div>
       )}
     </motion.div>
+  );
+}
+
+// ── Manage Events Tab ──────────────────────────────────────────────────────
+function ManageEventsTab() {
+  const [title, setTitle] = useState("");
+  const [dateTime, setDateTime] = useState("");
+  const [location, setLocation] = useState("");
+  const [price, setPrice] = useState("");
+  const { data: events, isLoading: eventsLoading } = useGetAllEvents();
+  const { mutateAsync: addEvent, isPending: adding } = useAddEvent();
+  const { mutateAsync: deleteEvent } = useDeleteEvent();
+  const [deletingId, setDeletingId] = useState<bigint | null>(null);
+
+  const handleUpload = async () => {
+    if (!title.trim() || !dateTime || !location.trim() || !price.trim()) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+    try {
+      const dateNs = BigInt(new Date(dateTime).getTime()) * 1_000_000n;
+      await addEvent({
+        title: title.trim(),
+        date: dateNs,
+        location: location.trim(),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        price: price.trim() as any,
+      });
+      toast.success("Event uploaded! It's now visible to everyone.");
+      setTitle("");
+      setDateTime("");
+      setLocation("");
+      setPrice("");
+    } catch {
+      toast.error("Failed to upload event. Please try again.");
+    }
+  };
+
+  const handleDelete = async (id: bigint) => {
+    setDeletingId(id);
+    try {
+      await deleteEvent(id);
+      toast.success("Event deleted.");
+    } catch {
+      toast.error("Failed to delete event.");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
+  return (
+    <div className="space-y-8">
+      {/* Upload form */}
+      <Card className="bg-card border border-border">
+        <CardHeader className="pb-3">
+          <CardTitle className="text-foreground text-lg flex items-center gap-2">
+            <Plus className="w-5 h-5 text-primary" />
+            Upload New Event
+          </CardTitle>
+        </CardHeader>
+        <CardContent className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label
+                htmlFor="event-title"
+                className="text-sm text-muted-foreground mb-1 block"
+              >
+                Event Title
+              </label>
+              <Input
+                id="event-title"
+                placeholder="e.g. Clover Party Night"
+                value={title}
+                onChange={(e) => setTitle(e.target.value)}
+                className="bg-input border-border text-foreground placeholder:text-muted-foreground"
+                data-ocid="admin.event_title.input"
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="event-date"
+                className="text-sm text-muted-foreground mb-1 block"
+              >
+                Event Date & Time
+              </label>
+              <Input
+                id="event-date"
+                type="datetime-local"
+                value={dateTime}
+                onChange={(e) => setDateTime(e.target.value)}
+                className="bg-input border-border text-foreground"
+                style={{ colorScheme: "dark" }}
+                data-ocid="admin.event_date.input"
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="event-location"
+                className="text-sm text-muted-foreground mb-1 block"
+              >
+                Location
+              </label>
+              <Input
+                id="event-location"
+                placeholder="e.g. IMVU Rooftop Room"
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+                className="bg-input border-border text-foreground placeholder:text-muted-foreground"
+                data-ocid="admin.event_location.input"
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="event-price"
+                className="text-sm text-muted-foreground mb-1 block"
+              >
+                Price
+              </label>
+              <Input
+                id="event-price"
+                placeholder="e.g. 500 credits"
+                value={price}
+                onChange={(e) => setPrice(e.target.value)}
+                className="bg-input border-border text-foreground placeholder:text-muted-foreground"
+                data-ocid="admin.event_price.input"
+              />
+            </div>
+          </div>
+          <Button
+            type="button"
+            className="w-full bg-primary text-primary-foreground hover:bg-primary/90 font-semibold"
+            onClick={handleUpload}
+            disabled={adding}
+            data-ocid="admin.upload_event.button"
+          >
+            {adding ? (
+              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+            ) : (
+              <Ticket className="w-4 h-4 mr-2" />
+            )}
+            {adding ? "Uploading..." : "Upload Event"}
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Existing events list */}
+      <div>
+        <h3 className="text-foreground font-semibold mb-3 flex items-center gap-2">
+          <CalendarDays className="w-4 h-4 text-primary" />
+          Existing Events
+        </h3>
+
+        {eventsLoading && (
+          <div className="space-y-2" data-ocid="admin.events.loading_state">
+            {[1, 2].map((i) => (
+              <Skeleton key={i} className="h-16 w-full bg-card" />
+            ))}
+          </div>
+        )}
+
+        {!eventsLoading && (!events || events.length === 0) && (
+          <div
+            className="text-center py-10 text-muted-foreground border border-dashed border-border rounded-lg"
+            data-ocid="admin.events.empty_state"
+          >
+            <Ticket className="w-10 h-10 mx-auto mb-2 opacity-20" />
+            <p className="text-sm">No events uploaded yet</p>
+          </div>
+        )}
+
+        {!eventsLoading && events && events.length > 0 && (
+          <div className="space-y-3">
+            {events.map((event, i) => (
+              <Card
+                key={event.id.toString()}
+                className="bg-card border border-border"
+                data-ocid={`admin.events.item.${i + 1}`}
+              >
+                <CardContent className="p-4 flex items-center justify-between gap-4">
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-2 mb-0.5">
+                      <span className="text-xs font-semibold text-primary/70 bg-primary/10 px-2 py-0.5 rounded-full border border-primary/20">
+                        🎟 Ticket
+                      </span>
+                    </div>
+                    <p className="text-foreground font-semibold truncate">
+                      {event.title}
+                    </p>
+                    <p className="text-muted-foreground text-xs mt-0.5">
+                      {formatDateTime(event.date)} · {event.location} ·{" "}
+                      <span className="text-primary">{event.price}</span>
+                    </p>
+                  </div>
+                  <Button
+                    type="button"
+                    size="sm"
+                    variant="destructive"
+                    className="shrink-0 h-8 px-3 text-xs opacity-80 hover:opacity-100"
+                    onClick={() => handleDelete(event.id)}
+                    disabled={deletingId === event.id}
+                    data-ocid={`admin.events.delete_button.${i + 1}`}
+                  >
+                    {deletingId === event.id ? (
+                      <Loader2 className="w-3 h-3 animate-spin" />
+                    ) : (
+                      <Trash2 className="w-3 h-3" />
+                    )}
+                    <span className="ml-1">Delete</span>
+                  </Button>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
   );
 }
 
@@ -405,121 +633,157 @@ function AdminPanel() {
 
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }}>
-      <div className="flex items-center gap-2 mb-6">
+      <div className="flex items-center gap-2 mb-1">
         <ShieldCheck className="w-6 h-6 text-primary" />
         <h2 className="text-2xl font-bold text-foreground">Admin Panel</h2>
       </div>
+      <p className="text-xs text-muted-foreground mb-6">
+        Admin access is restricted.
+      </p>
 
-      {isLoading && (
-        <div className="space-y-2" data-ocid="admin.loading_state">
-          {[1, 2, 3].map((i) => (
-            <Skeleton key={i} className="h-12 w-full bg-card" />
-          ))}
-        </div>
-      )}
+      <Tabs defaultValue="manage-events" className="w-full">
+        <TabsList className="bg-card border border-border mb-6">
+          <TabsTrigger
+            value="manage-events"
+            className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary"
+            data-ocid="admin.manage_events.tab"
+          >
+            Manage Events
+          </TabsTrigger>
+          <TabsTrigger
+            value="reservations"
+            className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary"
+            data-ocid="admin.reservations.tab"
+          >
+            Reservations
+          </TabsTrigger>
+        </TabsList>
 
-      {!isLoading && reservations && reservations.length === 0 && (
-        <div
-          className="text-center py-12 text-muted-foreground"
-          data-ocid="admin.empty_state"
-        >
-          <Ticket className="w-12 h-12 mx-auto mb-3 opacity-30" />
-          <p>No reservations yet</p>
-        </div>
-      )}
+        <TabsContent value="manage-events">
+          <ManageEventsTab />
+        </TabsContent>
 
-      {!isLoading && reservations && reservations.length > 0 && (
-        <div className="overflow-x-auto" data-ocid="admin.table">
-          <Table>
-            <TableHeader>
-              <TableRow className="border-border hover:bg-transparent">
-                <TableHead className="text-muted-foreground">ID</TableHead>
-                <TableHead className="text-muted-foreground">Event</TableHead>
-                <TableHead className="text-muted-foreground">
-                  IMVU User
-                </TableHead>
-                <TableHead className="text-muted-foreground">
-                  Txn Note
-                </TableHead>
-                <TableHead className="text-muted-foreground">Status</TableHead>
-                <TableHead className="text-muted-foreground">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {reservations.map((r, i) => (
-                <TableRow
-                  key={r.id.toString()}
-                  className="border-border hover:bg-card/50"
-                  data-ocid={`admin.row.${i + 1}`}
-                >
-                  <TableCell className="text-muted-foreground text-xs font-mono">
-                    #{r.id.toString()}
-                  </TableCell>
-                  <TableCell className="text-foreground text-sm">
-                    {r.eventDetails.title}
-                  </TableCell>
-                  <TableCell className="text-foreground text-sm">
-                    {r.imvuUsername}
-                  </TableCell>
-                  <TableCell className="text-muted-foreground text-xs">
-                    {r.transactionNote}
-                  </TableCell>
-                  <TableCell>
-                    <StatusBadge status={r.status} />
-                  </TableCell>
-                  <TableCell>
-                    <div className="flex gap-2">
-                      {r.status !== ReservationStatus.approved && (
-                        <Button
-                          type="button"
-                          size="sm"
-                          className="bg-primary/20 text-primary border border-primary/40 hover:bg-primary/30 h-7 px-2 text-xs"
-                          onClick={() =>
-                            handleUpdate(r.id, ReservationStatus.approved)
-                          }
-                          disabled={
-                            updating === `${r.id}-${ReservationStatus.approved}`
-                          }
-                          data-ocid={`admin.approve.button.${i + 1}`}
-                        >
-                          {updating ===
-                          `${r.id}-${ReservationStatus.approved}` ? (
-                            <Loader2 className="w-3 h-3 animate-spin" />
-                          ) : (
-                            "Approve"
-                          )}
-                        </Button>
-                      )}
-                      {r.status !== ReservationStatus.rejected && (
-                        <Button
-                          type="button"
-                          size="sm"
-                          variant="destructive"
-                          className="h-7 px-2 text-xs opacity-80 hover:opacity-100"
-                          onClick={() =>
-                            handleUpdate(r.id, ReservationStatus.rejected)
-                          }
-                          disabled={
-                            updating === `${r.id}-${ReservationStatus.rejected}`
-                          }
-                          data-ocid={`admin.reject.button.${i + 1}`}
-                        >
-                          {updating ===
-                          `${r.id}-${ReservationStatus.rejected}` ? (
-                            <Loader2 className="w-3 h-3 animate-spin" />
-                          ) : (
-                            "Reject"
-                          )}
-                        </Button>
-                      )}
-                    </div>
-                  </TableCell>
-                </TableRow>
+        <TabsContent value="reservations">
+          {isLoading && (
+            <div className="space-y-2" data-ocid="admin.loading_state">
+              {[1, 2, 3].map((i) => (
+                <Skeleton key={i} className="h-12 w-full bg-card" />
               ))}
-            </TableBody>
-          </Table>
-        </div>
-      )}
+            </div>
+          )}
+
+          {!isLoading && reservations && reservations.length === 0 && (
+            <div
+              className="text-center py-12 text-muted-foreground"
+              data-ocid="admin.empty_state"
+            >
+              <Ticket className="w-12 h-12 mx-auto mb-3 opacity-30" />
+              <p>No reservations yet</p>
+            </div>
+          )}
+
+          {!isLoading && reservations && reservations.length > 0 && (
+            <div className="overflow-x-auto" data-ocid="admin.table">
+              <Table>
+                <TableHeader>
+                  <TableRow className="border-border hover:bg-transparent">
+                    <TableHead className="text-muted-foreground">ID</TableHead>
+                    <TableHead className="text-muted-foreground">
+                      Event
+                    </TableHead>
+                    <TableHead className="text-muted-foreground">
+                      IMVU User
+                    </TableHead>
+                    <TableHead className="text-muted-foreground">
+                      Txn Note
+                    </TableHead>
+                    <TableHead className="text-muted-foreground">
+                      Status
+                    </TableHead>
+                    <TableHead className="text-muted-foreground">
+                      Actions
+                    </TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {reservations.map((r, i) => (
+                    <TableRow
+                      key={r.id.toString()}
+                      className="border-border hover:bg-card/50"
+                      data-ocid={`admin.row.${i + 1}`}
+                    >
+                      <TableCell className="text-muted-foreground text-xs font-mono">
+                        #{r.id.toString()}
+                      </TableCell>
+                      <TableCell className="text-foreground text-sm">
+                        {r.eventDetails.title}
+                      </TableCell>
+                      <TableCell className="text-foreground text-sm">
+                        {r.imvuUsername}
+                      </TableCell>
+                      <TableCell className="text-muted-foreground text-xs">
+                        {r.transactionNote}
+                      </TableCell>
+                      <TableCell>
+                        <StatusBadge status={r.status} />
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex gap-2">
+                          {r.status !== ReservationStatus.approved && (
+                            <Button
+                              type="button"
+                              size="sm"
+                              className="bg-primary/20 text-primary border border-primary/40 hover:bg-primary/30 h-7 px-2 text-xs"
+                              onClick={() =>
+                                handleUpdate(r.id, ReservationStatus.approved)
+                              }
+                              disabled={
+                                updating ===
+                                `${r.id}-${ReservationStatus.approved}`
+                              }
+                              data-ocid={`admin.approve.button.${i + 1}`}
+                            >
+                              {updating ===
+                              `${r.id}-${ReservationStatus.approved}` ? (
+                                <Loader2 className="w-3 h-3 animate-spin" />
+                              ) : (
+                                "Approve"
+                              )}
+                            </Button>
+                          )}
+                          {r.status !== ReservationStatus.rejected && (
+                            <Button
+                              type="button"
+                              size="sm"
+                              variant="destructive"
+                              className="h-7 px-2 text-xs opacity-80 hover:opacity-100"
+                              onClick={() =>
+                                handleUpdate(r.id, ReservationStatus.rejected)
+                              }
+                              disabled={
+                                updating ===
+                                `${r.id}-${ReservationStatus.rejected}`
+                              }
+                              data-ocid={`admin.reject.button.${i + 1}`}
+                            >
+                              {updating ===
+                              `${r.id}-${ReservationStatus.rejected}` ? (
+                                <Loader2 className="w-3 h-3 animate-spin" />
+                              ) : (
+                                "Reject"
+                              )}
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </div>
+          )}
+        </TabsContent>
+      </Tabs>
     </motion.div>
   );
 }
@@ -556,15 +820,18 @@ export default function App() {
 
       {/* Header */}
       <header className="border-b border-border/50 backdrop-blur-sm sticky top-0 z-10 bg-background/90">
-        <div className="max-w-6xl mx-auto px-4 py-4 flex items-center justify-between">
+        <div className="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between">
           <button
             type="button"
-            className="flex items-center gap-2 text-xl font-bold text-primary hover:text-primary/80 transition-colors"
+            className="flex items-center hover:opacity-80 transition-opacity"
             onClick={handleBack}
             data-ocid="nav.home.link"
           >
-            <span className="text-2xl">🍀</span>
-            <span>Project Clover</span>
+            <img
+              src="/assets/uploads/img_4224-019d22df-d36a-701e-b72a-4a02f87dcacb-1.png"
+              alt="Project Clover"
+              className="h-14 w-auto object-contain"
+            />
           </button>
 
           <nav className="hidden md:flex items-center gap-1">

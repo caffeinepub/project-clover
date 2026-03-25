@@ -1,24 +1,20 @@
 # Project Clover
 
 ## Current State
-New project, no existing code.
+React + Motoko ticket reservation app. Header uses old logo path. Admin panel restricted by backend role system. Event upload datetime-local input invisible in dark mode.
 
 ## Requested Changes (Diff)
 
 ### Add
-- Event listing page with 2 events (Clover Party Night and VIP Clover Lounge)
-- Ticket reservation flow: select event → payment instructions → submit form
-- Backend to store reservation submissions (IMVU username, transaction note, event)
-- Admin view to see pending/approved reservations
+- Nothing
 
 ### Modify
-N/A
+- Header logo: swap img src to new uploaded path
+- Event upload: fix datetime-local dark mode visibility
 
 ### Remove
-N/A
+- Old logo path
 
 ## Implementation Plan
-1. Backend: store reservations with fields (eventId, imvuUsername, transactionNote, status: pending/approved/rejected)
-2. Backend: query all reservations (admin), submit reservation (public)
-3. Frontend: event cards grid → reservation form flow → confirmation screen
-4. Use authorization for admin access to view reservations
+1. Update header img src to /assets/uploads/img_4224-019d22df-d36a-701e-b72a-4a02f87dcacb-1.png
+2. Add style={{ colorScheme: 'dark' }} to datetime-local input in ManageEventsTab

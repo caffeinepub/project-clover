@@ -2,25 +2,37 @@ import Map "mo:core/Map";
 import Nat "mo:core/Nat";
 import Time "mo:core/Time";
 import Runtime "mo:core/Runtime";
+import Int "mo:core/Int";
 import Array "mo:core/Array";
 import Text "mo:core/Text";
 import Principal "mo:core/Principal";
 import AccessControl "authorization/access-control";
 import MixinAuthorization "authorization/MixinAuthorization";
 
+
+
 actor {
-  module Event {
-    public func compare(event1 : Event, event2 : Event) : { #less; #equal; #greater } {
-      Nat.compare(event1.id, event2.id);
-    };
-  };
+  type ReservationId = Nat;
+
   module Reservation {
     public func compare(reservation1 : Reservation, reservation2 : Reservation) : { #less; #equal; #greater } {
       Nat.compare(reservation1.id, reservation2.id);
     };
   };
+  module ReservationOutput {
+    public func compare(res1 : ReservationOutput, res2 : ReservationOutput) : { #less; #equal; #greater } {
+      Nat.compare(res1.id, res2.id);
+    };
+  };
+
+  module Event {
+    public func compare(event1 : Event, event2 : Event) : { #less; #equal; #greater } {
+      Nat.compare(event1.id, event2.id);
+    };
+  };
 
   let events = Map.empty<Nat, Event>();
+  var nextEventId = 0;
 
   let reservations = Map.empty<Nat, Reservation>();
   var nextReservationId = 0;
@@ -31,9 +43,16 @@ actor {
   public type Event = {
     id : Nat;
     title : Text;
-    date : Time.Time;
+    date : Int;
     location : Text;
-    price : Text;
+    price : Nat;
+  };
+
+  public type EventInput = {
+    title : Text;
+    date : Int;
+    location : Text;
+    price : Nat;
   };
 
   public type ReservationStatus = {
@@ -43,7 +62,7 @@ actor {
   };
 
   public type Reservation = {
-    id : Nat;
+    id : ReservationId;
     eventId : Nat;
     imvuUsername : Text;
     transactionNote : Text;
@@ -94,6 +113,30 @@ actor {
     userProfiles.add(caller, profile);
   };
 
+  public shared ({ caller }) func addEvent(input : EventInput) : async Nat {
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can add events.");
+    };
+    let eventId = nextEventId;
+    nextEventId += 1;
+    let event : Event = {
+      id = eventId;
+      title = input.title;
+      date = input.date;
+      location = input.location;
+      price = input.price;
+    };
+    events.add(eventId, event);
+    eventId;
+  };
+
+  public shared ({ caller }) func deleteEvent(id : Nat) : async () {
+    if (not AccessControl.isAdmin(accessControlState, caller)) {
+      Runtime.trap("Unauthorized: Only admins can delete events.");
+    };
+    events.remove(id);
+  };
+
   public func submitReservation(eventId : Nat, imvuUsername : Text, transactionNote : Text) : async Nat {
     switch (events.get(eventId)) {
       case (null) { Runtime.trap("Could not find event. ") };
@@ -130,20 +173,20 @@ actor {
     };
   };
 
-  public query ({ caller }) func getAllEventReservations(eventId : Nat) : async [ReservationOutput] {
+  public query ({ caller }) func getAllReservationsForEvent(eventId : Nat) : async [ReservationOutput] {
     if (not AccessControl.isAdmin(accessControlState, caller)) {
       Runtime.trap("Unauthorized: Only admins can view all event reservations.");
     };
     reservations.values().toArray().filter(
       func(reservation) { reservation.eventId == eventId }
-    ).map(func(reservation) { withEventDetails(reservation) });
+    ).map(func(reservation) { withEventDetails(reservation) }).sort();
   };
 
   public query ({ caller }) func getAllReservations() : async [ReservationOutput] {
     if (not AccessControl.isAdmin(accessControlState, caller)) {
       Runtime.trap("Unauthorized: Only admins can view all reservations.");
     };
-    reservations.values().toArray().sort().map(func(reservation) { withEventDetails(reservation) });
+    reservations.values().toArray().map(func(reservation) { withEventDetails(reservation) }).sort();
   };
 
   public query func getReservationsByUsername(imvuUsername : Text) : async [ReservationOutput] {
@@ -156,9 +199,6 @@ actor {
     switch (reservations.get(id)) {
       case (null) { Runtime.trap("Reservation not found.") };
       case (?reservation) {
-        // Allow admins or anyone checking via the public username lookup
-        // Since we can't verify username ownership without authentication,
-        // we restrict to admin-only for direct ID lookup
         if (not AccessControl.isAdmin(accessControlState, caller)) {
           Runtime.trap("Unauthorized: Only admins can view reservations by ID. Use getReservationsByUsername instead.");
         };

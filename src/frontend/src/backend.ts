@@ -90,6 +90,12 @@ export class ExternalBlob {
     }
 }
 export type Time = bigint;
+export interface EventInput {
+    title: string;
+    date: bigint;
+    price: bigint;
+    location: string;
+}
 export interface ReservationUpdate {
     id: bigint;
     status: ReservationStatus;
@@ -97,8 +103,8 @@ export interface ReservationUpdate {
 export interface Event {
     id: bigint;
     title: string;
-    date: Time;
-    price: string;
+    date: bigint;
+    price: bigint;
     location: string;
 }
 export interface UserProfile {
@@ -126,10 +132,12 @@ export enum UserRole {
 }
 export interface backendInterface {
     _initializeAccessControlWithSecret(userSecret: string): Promise<void>;
+    addEvent(input: EventInput): Promise<bigint>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
-    getAllEventReservations(eventId: bigint): Promise<Array<ReservationOutput>>;
+    deleteEvent(id: bigint): Promise<void>;
     getAllEvents(): Promise<Array<Event>>;
     getAllReservations(): Promise<Array<ReservationOutput>>;
+    getAllReservationsForEvent(eventId: bigint): Promise<Array<ReservationOutput>>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
     getReservation(id: bigint): Promise<ReservationOutput>;
@@ -157,6 +165,20 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async addEvent(arg0: EventInput): Promise<bigint> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.addEvent(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.addEvent(arg0);
+            return result;
+        }
+    }
     async assignCallerUserRole(arg0: Principal, arg1: UserRole): Promise<void> {
         if (this.processError) {
             try {
@@ -171,18 +193,18 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async getAllEventReservations(arg0: bigint): Promise<Array<ReservationOutput>> {
+    async deleteEvent(arg0: bigint): Promise<void> {
         if (this.processError) {
             try {
-                const result = await this.actor.getAllEventReservations(arg0);
-                return from_candid_vec_n3(this._uploadFile, this._downloadFile, result);
+                const result = await this.actor.deleteEvent(arg0);
+                return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.getAllEventReservations(arg0);
-            return from_candid_vec_n3(this._uploadFile, this._downloadFile, result);
+            const result = await this.actor.deleteEvent(arg0);
+            return result;
         }
     }
     async getAllEvents(): Promise<Array<Event>> {
@@ -210,6 +232,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.getAllReservations();
+            return from_candid_vec_n3(this._uploadFile, this._downloadFile, result);
+        }
+    }
+    async getAllReservationsForEvent(arg0: bigint): Promise<Array<ReservationOutput>> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.getAllReservationsForEvent(arg0);
+                return from_candid_vec_n3(this._uploadFile, this._downloadFile, result);
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.getAllReservationsForEvent(arg0);
             return from_candid_vec_n3(this._uploadFile, this._downloadFile, result);
         }
     }

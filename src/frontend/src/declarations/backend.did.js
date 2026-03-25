@@ -8,10 +8,23 @@
 
 import { IDL } from '@icp-sdk/core/candid';
 
+export const EventInput = IDL.Record({
+  'title' : IDL.Text,
+  'date' : IDL.Int,
+  'price' : IDL.Nat,
+  'location' : IDL.Text,
+});
 export const UserRole = IDL.Variant({
   'admin' : IDL.Null,
   'user' : IDL.Null,
   'guest' : IDL.Null,
+});
+export const Event = IDL.Record({
+  'id' : IDL.Nat,
+  'title' : IDL.Text,
+  'date' : IDL.Int,
+  'price' : IDL.Nat,
+  'location' : IDL.Text,
 });
 export const ReservationStatus = IDL.Variant({
   'pending' : IDL.Null,
@@ -19,13 +32,6 @@ export const ReservationStatus = IDL.Variant({
   'rejected' : IDL.Null,
 });
 export const Time = IDL.Int;
-export const Event = IDL.Record({
-  'id' : IDL.Nat,
-  'title' : IDL.Text,
-  'date' : Time,
-  'price' : IDL.Text,
-  'location' : IDL.Text,
-});
 export const ReservationOutput = IDL.Record({
   'id' : IDL.Nat,
   'status' : ReservationStatus,
@@ -46,14 +52,16 @@ export const ReservationUpdate = IDL.Record({
 
 export const idlService = IDL.Service({
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
+  'addEvent' : IDL.Func([EventInput], [IDL.Nat], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
-  'getAllEventReservations' : IDL.Func(
+  'deleteEvent' : IDL.Func([IDL.Nat], [], []),
+  'getAllEvents' : IDL.Func([], [IDL.Vec(Event)], ['query']),
+  'getAllReservations' : IDL.Func([], [IDL.Vec(ReservationOutput)], ['query']),
+  'getAllReservationsForEvent' : IDL.Func(
       [IDL.Nat],
       [IDL.Vec(ReservationOutput)],
       ['query'],
     ),
-  'getAllEvents' : IDL.Func([], [IDL.Vec(Event)], ['query']),
-  'getAllReservations' : IDL.Func([], [IDL.Vec(ReservationOutput)], ['query']),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
   'getCallerUserRole' : IDL.Func([], [UserRole], ['query']),
   'getReservation' : IDL.Func([IDL.Nat], [ReservationOutput], ['query']),
@@ -76,10 +84,23 @@ export const idlService = IDL.Service({
 export const idlInitArgs = [];
 
 export const idlFactory = ({ IDL }) => {
+  const EventInput = IDL.Record({
+    'title' : IDL.Text,
+    'date' : IDL.Int,
+    'price' : IDL.Nat,
+    'location' : IDL.Text,
+  });
   const UserRole = IDL.Variant({
     'admin' : IDL.Null,
     'user' : IDL.Null,
     'guest' : IDL.Null,
+  });
+  const Event = IDL.Record({
+    'id' : IDL.Nat,
+    'title' : IDL.Text,
+    'date' : IDL.Int,
+    'price' : IDL.Nat,
+    'location' : IDL.Text,
   });
   const ReservationStatus = IDL.Variant({
     'pending' : IDL.Null,
@@ -87,13 +108,6 @@ export const idlFactory = ({ IDL }) => {
     'rejected' : IDL.Null,
   });
   const Time = IDL.Int;
-  const Event = IDL.Record({
-    'id' : IDL.Nat,
-    'title' : IDL.Text,
-    'date' : Time,
-    'price' : IDL.Text,
-    'location' : IDL.Text,
-  });
   const ReservationOutput = IDL.Record({
     'id' : IDL.Nat,
     'status' : ReservationStatus,
@@ -114,15 +128,17 @@ export const idlFactory = ({ IDL }) => {
   
   return IDL.Service({
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
+    'addEvent' : IDL.Func([EventInput], [IDL.Nat], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
-    'getAllEventReservations' : IDL.Func(
-        [IDL.Nat],
-        [IDL.Vec(ReservationOutput)],
-        ['query'],
-      ),
+    'deleteEvent' : IDL.Func([IDL.Nat], [], []),
     'getAllEvents' : IDL.Func([], [IDL.Vec(Event)], ['query']),
     'getAllReservations' : IDL.Func(
         [],
+        [IDL.Vec(ReservationOutput)],
+        ['query'],
+      ),
+    'getAllReservationsForEvent' : IDL.Func(
+        [IDL.Nat],
         [IDL.Vec(ReservationOutput)],
         ['query'],
       ),

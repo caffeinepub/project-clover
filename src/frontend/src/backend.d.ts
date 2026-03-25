@@ -8,6 +8,12 @@ export interface None {
 }
 export type Option<T> = Some<T> | None;
 export type Time = bigint;
+export interface EventInput {
+    title: string;
+    date: bigint;
+    price: string;
+    location: string;
+}
 export interface ReservationUpdate {
     id: bigint;
     status: ReservationStatus;
@@ -15,7 +21,7 @@ export interface ReservationUpdate {
 export interface Event {
     id: bigint;
     title: string;
-    date: Time;
+    date: bigint;
     price: string;
     location: string;
 }
@@ -43,9 +49,11 @@ export enum UserRole {
     guest = "guest"
 }
 export interface backendInterface {
+    addEvent(input: EventInput): Promise<bigint>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
-    getAllEventReservations(eventId: bigint): Promise<Array<ReservationOutput>>;
+    deleteEvent(id: bigint): Promise<void>;
     getAllEvents(): Promise<Array<Event>>;
+    getAllEventReservations(eventId: bigint): Promise<Array<ReservationOutput>>;
     getAllReservations(): Promise<Array<ReservationOutput>>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
