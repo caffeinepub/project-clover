@@ -36,6 +36,7 @@ actor {
 
   let reservations = Map.empty<Nat, Reservation>();
   var nextReservationId = 0;
+  var recipientUsername = "Iluvlean";
 
   let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
@@ -187,5 +188,12 @@ actor {
         reservations.add(request.id, updated);
       };
     };
+  };
+  public shared func setRecipientUsername(username : Text) : async () {
+    recipientUsername := username;
+  };
+
+  public query func getRecipientUsername() : async Text {
+    recipientUsername
   };
 };

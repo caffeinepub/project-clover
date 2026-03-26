@@ -64,4 +64,6 @@ export interface backendInterface {
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     submitReservation(eventId: bigint, imvuUsername: string, transactionNote: string): Promise<bigint>;
     updateReservation(request: ReservationUpdate): Promise<void>;
+    setRecipientUsername(username: string): Promise<void>;
+    getRecipientUsername(): Promise<string>;
 }

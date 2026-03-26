@@ -147,6 +147,8 @@ export interface backendInterface {
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     submitReservation(eventId: bigint, imvuUsername: string, transactionNote: string): Promise<bigint>;
     updateReservation(request: ReservationUpdate): Promise<void>;
+    setRecipientUsername(username: string): Promise<void>;
+    getRecipientUsername(): Promise<string>;
 }
 import type { Event as _Event, ReservationOutput as _ReservationOutput, ReservationStatus as _ReservationStatus, ReservationUpdate as _ReservationUpdate, Time as _Time, UserProfile as _UserProfile, UserRole as _UserRole } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
@@ -375,6 +377,20 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async setRecipientUsername(username: string): Promise<void> {
+        if (this.processError) {
+            try { return await this.actor.setRecipientUsername(username); }
+            catch (e) { this.processError(e); }
+        }
+        return this.actor.setRecipientUsername(username);
+    }
+    async getRecipientUsername(): Promise<string> {
+        if (this.processError) {
+            try { return await this.actor.getRecipientUsername(); }
+            catch (e) { this.processError(e); }
+        }
+        return this.actor.getRecipientUsername();
+    }
 }
 function from_candid_ReservationOutput_n4(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _ReservationOutput): ReservationOutput {
     return from_candid_record_n5(_uploadFile, _downloadFile, value);
@@ -493,6 +509,7 @@ export interface CreateActorOptions {
     actorOptions?: ActorConfig;
     processError?: (error: unknown) => never;
 }
+
 export function createActor(canisterId: string, _uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, options: CreateActorOptions = {}): Backend {
     const agent = options.agent || HttpAgent.createSync({
         ...options.agentOptions

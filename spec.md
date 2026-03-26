@@ -1,20 +1,24 @@
 # Project Clover
 
 ## Current State
-React + Motoko ticket reservation app. Header uses old logo path. Admin panel restricted by backend role system. Event upload datetime-local input invisible in dark mode.
+The IMVU credit recipient username is stored in localStorage only. Each device has its own copy, so changing it in admin only updates that browser.
 
 ## Requested Changes (Diff)
 
 ### Add
-- Nothing
+- Backend stable var `recipientUsername` defaulting to "Iluvlean"
+- Backend `setRecipientUsername(username: Text) : async ()`
+- Backend `getRecipientUsername() : async Text` query
 
 ### Modify
-- Header logo: swap img src to new uploaded path
-- Event upload: fix datetime-local dark mode visibility
+- Frontend: fetch recipient username from backend on load
+- Frontend: save to backend on Done button click
+- Remove localStorage reads/writes for recipient username
 
 ### Remove
-- Old logo path
+- localStorage usage for imvuRecipient
 
 ## Implementation Plan
-1. Update header img src to /assets/uploads/img_4224-019d22df-d36a-701e-b72a-4a02f87dcacb-1.png
-2. Add style={{ colorScheme: 'dark' }} to datetime-local input in ManageEventsTab
+1. Add stable var and two functions to main.mo
+2. Update backend.d.ts with new function signatures
+3. Update App.tsx hooks and components to use backend

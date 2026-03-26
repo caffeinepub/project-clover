@@ -139,3 +139,29 @@ export function useDeleteEvent() {
     },
   });
 }
+
+export function useGetRecipientUsername() {
+  const { actor, isFetching } = useActor();
+  return useQuery({
+    queryKey: ["recipientUsername"],
+    queryFn: async () => {
+      if (!actor) return "Iluvlean";
+      return actor.getRecipientUsername();
+    },
+    enabled: !!actor && !isFetching,
+  });
+}
+
+export function useSetRecipientUsername() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (username: string) => {
+      const resolvedActor = actor ?? (await createActorWithConfig());
+      return resolvedActor.setRecipientUsername(username);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["recipientUsername"] });
+    },
+  });
+}

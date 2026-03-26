@@ -70,6 +70,8 @@ export const idlService = IDL.Service({
   'saveCallerUserProfile' : IDL.Func([UserProfile], [], []),
   'submitReservation' : IDL.Func([IDL.Nat, IDL.Text, IDL.Text], [IDL.Nat], []),
   'updateReservation' : IDL.Func([ReservationUpdate], [], []),
+  'setRecipientUsername' : IDL.Func([IDL.Text], [], []),
+  'getRecipientUsername' : IDL.Func([], [IDL.Text], ['query']),
 });
 
 export const idlInitArgs = [];
@@ -149,6 +151,8 @@ export const idlFactory = ({ IDL }) => {
         [],
       ),
     'updateReservation' : IDL.Func([ReservationUpdate], [], []),
+  'setRecipientUsername' : IDL.Func([IDL.Text], [], []),
+  'getRecipientUsername' : IDL.Func([], [IDL.Text], ['query']),
   });
 };
 

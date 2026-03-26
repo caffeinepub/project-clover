@@ -36,6 +36,8 @@ import {
   useDeleteEvent,
   useGetAllEvents,
   useGetAllReservations,
+  useGetRecipientUsername,
+  useSetRecipientUsername,
   useSubmitReservation,
   useUpdateReservation,
 } from "./hooks/useQueries";
@@ -866,17 +868,16 @@ function ManageEventsTab() {
 // ── Recipient Username Input ──────────────────────────────────────────────
 function RecipientUsernameInput({
   recipientUsername,
-  onRecipientChange,
 }: {
   recipientUsername: string;
-  onRecipientChange: (v: string) => void;
 }) {
   const [localRecipient, setLocalRecipient] = useState(recipientUsername);
+  const { mutateAsync: saveRecipient, isPending: isSaving } =
+    useSetRecipientUsername();
 
-  const handleDone = () => {
-    onRecipientChange(localRecipient);
-    localStorage.setItem("imvuRecipient", localRecipient);
-    toast.success("Recipient username saved!");
+  const handleDone = async () => {
+    await saveRecipient(localRecipient.trim());
+    toast.success("Recipient username saved for everyone!");
   };
 
   return (
@@ -892,10 +893,11 @@ function RecipientUsernameInput({
       <Button
         type="button"
         onClick={handleDone}
+        disabled={isSaving}
         className="mt-2 bg-primary text-primary-foreground hover:bg-primary/90 w-full"
         data-ocid="admin.recipient_done.button"
       >
-        Done
+        {isSaving ? "Saving..." : "Done"}
       </Button>
       <p className="text-xs text-muted-foreground mt-2">
         Users will be instructed to send credits to this username.
@@ -907,10 +909,8 @@ function RecipientUsernameInput({
 // ── Admin Panel ───────────────────────────────────────────────────────────
 function AdminPanel({
   recipientUsername,
-  onRecipientChange,
 }: {
   recipientUsername: string;
-  onRecipientChange: (v: string) => void;
 }) {
   const { data: reservations, isLoading } = useGetAllReservations();
   const { mutateAsync: updateRes } = useUpdateReservation();
@@ -1210,10 +1210,7 @@ function AdminPanel({
                 >
                   IMVU Recipient Username
                 </label>
-                <RecipientUsernameInput
-                  recipientUsername={recipientUsername}
-                  onRecipientChange={onRecipientChange}
-                />
+                <RecipientUsernameInput recipientUsername={recipientUsername} />
               </div>
             </CardContent>
           </Card>
@@ -1231,9 +1228,7 @@ export default function App() {
   const [adminUnlocked, setAdminUnlocked] = useState(false);
   const [adminCodeInput, setAdminCodeInput] = useState("");
   const [showAdminPrompt, setShowAdminPrompt] = useState(false);
-  const [recipientUsername, setRecipientUsername] = useState(() => {
-    return localStorage.getItem("imvuRecipient") || "Iluvlean";
-  });
+  const { data: recipientUsername = "Iluvlean" } = useGetRecipientUsername();
   const { data: events, isLoading: eventsLoading } = useGetAllEvents();
 
   const handleReserve = (event: Event) => {
@@ -1500,10 +1495,7 @@ export default function App() {
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
             >
-              <AdminPanel
-                recipientUsername={recipientUsername}
-                onRecipientChange={setRecipientUsername}
-              />
+              <AdminPanel recipientUsername={recipientUsername} />
             </motion.div>
           )}
         </AnimatePresence>

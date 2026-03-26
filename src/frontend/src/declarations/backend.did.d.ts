@@ -56,6 +56,8 @@ export interface _SERVICE {
   'saveCallerUserProfile' : ActorMethod<[UserProfile], undefined>,
   'submitReservation' : ActorMethod<[bigint, string, string], bigint>,
   'updateReservation' : ActorMethod<[ReservationUpdate], undefined>,
+  'setRecipientUsername' : ActorMethod<[string], undefined>,
+  'getRecipientUsername' : ActorMethod<[], string>,
 }
 export declare const idlService: IDL.ServiceClass;
 export declare const idlInitArgs: IDL.Type[];
