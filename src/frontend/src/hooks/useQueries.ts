@@ -12,7 +12,7 @@ export function useGetAllEvents() {
       return actor.getAllEvents();
     },
     enabled: !!actor && !isFetching,
-    refetchInterval: 30000, // auto-refresh every 30s so new events appear
+    refetchInterval: 30000,
   });
 }
 
@@ -67,7 +67,6 @@ export function useSubmitReservation() {
       transactionNote: string;
     }) => {
       const resolvedActor = actor ?? (await createActorWithConfig());
-      // Normalize username: trim whitespace and lowercase for consistent lookup
       return resolvedActor.submitReservation(
         eventId,
         imvuUsername.trim().toLowerCase(),
@@ -95,26 +94,32 @@ export function useUpdateReservation() {
 }
 
 export function useAddEvent() {
-  const { actor } = useActor();
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: async (input: EventInput) => {
-      const maxRetries = 3;
+    mutationFn: async ({
+      input,
+      onRetry,
+    }: {
+      input: EventInput;
+      onRetry?: (attempt: number, total: number) => void;
+    }) => {
+      const maxRetries = 10;
+      // Increasing delays: give canister plenty of time to restart between attempts
+      const delays = [
+        2000, 4000, 8000, 12000, 18000, 25000, 35000, 45000, 60000, 60000,
+      ];
       let lastError: unknown;
       for (let attempt = 0; attempt < maxRetries; attempt++) {
         try {
-          const resolvedActor = actor ?? (await createActorWithConfig());
+          const resolvedActor = await createActorWithConfig();
           return await resolvedActor.addEvent(input);
         } catch (err) {
           lastError = err;
-          const msg = err instanceof Error ? err.message : String(err);
-          if (
-            (msg.includes("stopped") || msg.includes("IC0508")) &&
-            attempt < maxRetries - 1
-          ) {
-            await new Promise((resolve) => setTimeout(resolve, 2000));
-          } else {
-            throw err;
+          if (attempt < maxRetries - 1) {
+            onRetry?.(attempt + 1, maxRetries);
+            await new Promise((resolve) =>
+              setTimeout(resolve, delays[attempt]),
+            );
           }
         }
       }

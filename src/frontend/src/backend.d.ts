@@ -12,6 +12,7 @@ export interface EventInput {
     title: string;
     date: bigint;
     price: bigint;
+    recipientUsername: string;
     location: string;
 }
 export interface ReservationUpdate {
@@ -23,6 +24,7 @@ export interface Event {
     title: string;
     date: bigint;
     price: bigint;
+    recipientUsername: string;
     location: string;
 }
 export interface UserProfile {
@@ -53,17 +55,16 @@ export interface backendInterface {
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     deleteEvent(id: bigint): Promise<void>;
     getAllEvents(): Promise<Array<Event>>;
-    getAllEventReservations(eventId: bigint): Promise<Array<ReservationOutput>>;
     getAllReservations(): Promise<Array<ReservationOutput>>;
+    getCallerReservations(): Promise<Array<ReservationOutput>>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
-    getReservation(id: bigint): Promise<ReservationOutput>;
+    getRecipientUsername(): Promise<string>;
     getReservationsByUsername(imvuUsername: string): Promise<Array<ReservationOutput>>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
+    setRecipientUsername(username: string): Promise<void>;
     submitReservation(eventId: bigint, imvuUsername: string, transactionNote: string): Promise<bigint>;
     updateReservation(request: ReservationUpdate): Promise<void>;
-    setRecipientUsername(username: string): Promise<void>;
-    getRecipientUsername(): Promise<string>;
 }

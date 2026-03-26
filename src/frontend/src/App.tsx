@@ -421,13 +421,11 @@ function EventCard({
 // ── Reservation Modal ─────────────────────────────────────────────────────────
 function ReservationModal({
   event,
-  recipientUsername,
   open,
   onClose,
   onSuccess,
 }: {
   event: Event | null;
-  recipientUsername: string;
   open: boolean;
   onClose: () => void;
   onSuccess: () => void;
@@ -539,7 +537,7 @@ function ReservationModal({
               className="font-bold"
               style={{ color: "oklch(0.92 0.32 145)" }}
             >
-              {recipientUsername}
+              {event?.recipientUsername}
             </span>
           </p>
           <p className="text-sm text-foreground">
@@ -858,15 +856,12 @@ function LookupView() {
 }
 
 // ── Manage Events Tab ─────────────────────────────────────────────────────────
-const MAX_RETRIES = 5;
-const RETRY_DELAYS = [2000, 4000, 6000, 8000, 10000];
 
 function ManageEventsTab() {
   const { data: events, isLoading: eventsLoading } = useGetAllEvents();
   const { mutateAsync: addEvent } = useAddEvent();
   const { mutateAsync: deleteEvent } = useDeleteEvent();
   const { data: fetchedRecipient = "" } = useGetRecipientUsername();
-  const { mutateAsync: setRecipientUsername } = useSetRecipientUsername();
   const [title, setTitle] = useState("");
   const [dateTime, setDateTime] = useState("");
   const [location, setLocation] = useState("");
@@ -894,61 +889,35 @@ function ManageEventsTab() {
     const priceBigInt = Number.isNaN(priceNum)
       ? 0n
       : BigInt(Math.round(priceNum));
-    let lastError = "Unknown error";
-    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
-      try {
-        await addEvent({
+    const retryToastId = toast.loading("Uploading event...");
+    try {
+      await addEvent({
+        input: {
           title,
           date: BigInt(dateMs) * 1_000_000n,
           location,
           price: priceBigInt,
-        });
-        toast.success("Event uploaded!");
-        setTitle("");
-        setDateTime("");
-        setLocation("");
-        setPrice("");
-        if (sendCreditsTo && sendCreditsTo !== fetchedRecipient) {
-          try {
-            await setRecipientUsername(sendCreditsTo);
-          } catch {
-            // non-critical, ignore
-          }
-        }
-        setAdding(false);
-        return;
-      } catch (err: unknown) {
-        const msg = err instanceof Error ? err.message : String(err);
-        lastError = msg;
-        if (
-          msg.includes("stopped") ||
-          msg.includes("IC0508") ||
-          msg.includes("restarting")
-        ) {
-          if (attempt < MAX_RETRIES - 1) {
-            toast.info(
-              `Server is restarting... retrying (${attempt + 1}/${MAX_RETRIES - 1})`,
-            );
-            await new Promise((resolve) =>
-              setTimeout(resolve, RETRY_DELAYS[attempt]),
-            );
-            continue;
-          }
-        }
-        break;
-      }
-    }
-    setAdding(false);
-    if (
-      lastError.includes("stopped") ||
-      lastError.includes("IC0508") ||
-      lastError.includes("restarting")
-    ) {
+          recipientUsername: sendCreditsTo || "Iluvlean",
+        },
+        onRetry: (attempt, total) => {
+          toast.loading(`Server restarting — retrying ${attempt}/${total}...`, {
+            id: retryToastId,
+          });
+        },
+      });
+      toast.dismiss(retryToastId);
+      toast.success("Event uploaded!");
+      setTitle("");
+      setDateTime("");
+      setLocation("");
+      setPrice("");
+    } catch {
+      toast.dismiss(retryToastId);
       toast.error(
-        "Server is still restarting after several attempts. Please wait a minute and try again.",
+        "Upload failed after multiple attempts. Please wait a minute and try again.",
       );
-    } else {
-      toast.error(`Upload failed: ${lastError}`);
+    } finally {
+      setAdding(false);
     }
   };
 
@@ -1651,7 +1620,6 @@ export default function App() {
       {/* Reservation Modal */}
       <ReservationModal
         event={reserveEvent}
-        recipientUsername={recipientUsername}
         open={reserveOpen}
         onClose={() => setReserveOpen(false)}
         onSuccess={handleReserveSuccess}
@@ -1755,7 +1723,7 @@ export default function App() {
             data-ocid="nav.logo.button"
           >
             <img
-              src="/assets/uploads/3daae5d6-06e7-40e5-afb4-391ab2b451ba-019d2b5c-92d0-72d0-8600-5d53241f36fa-1.png"
+              src="/assets/generated/clover-logo-transparent.dim_300x300.png"
               alt="Project Clover"
               className="h-9 w-9 object-contain"
               style={{
@@ -1870,7 +1838,7 @@ export default function App() {
                 >
                   <div className="flex items-center justify-center gap-3 mb-3">
                     <img
-                      src="/assets/uploads/3daae5d6-06e7-40e5-afb4-391ab2b451ba-019d2b5c-92d0-72d0-8600-5d53241f36fa-1.png"
+                      src="/assets/generated/clover-logo-transparent.dim_300x300.png"
                       alt="Clover"
                       className="h-14 w-14 object-contain"
                       style={{
