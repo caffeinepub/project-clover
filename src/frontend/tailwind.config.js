@@ -5,7 +5,7 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        display: ["Bricolage Grotesque", "system-ui", "sans-serif"],
+        display: ["Fraunces", "Georgia", "serif"],
         sans: ["Bricolage Grotesque", "system-ui", "sans-serif"],
       },
       colors: {
@@ -66,8 +66,9 @@ export default {
         sm: "calc(var(--radius) - 4px)",
       },
       boxShadow: {
-        glow: "0 0 20px oklch(0.79 0.21 142 / 0.3)",
-        "glow-lg": "0 0 40px oklch(0.79 0.21 142 / 0.25)",
+        glow: "0 0 20px oklch(0.82 0.29 142 / 0.35), 0 0 50px oklch(0.82 0.29 142 / 0.12)",
+        "glow-lg": "0 0 40px oklch(0.82 0.29 142 / 0.3), 0 0 80px oklch(0.82 0.29 142 / 0.1)",
+        "glow-sm": "0 0 10px oklch(0.82 0.29 142 / 0.4)",
       },
     },
   },
