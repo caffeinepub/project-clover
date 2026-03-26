@@ -5,8 +5,8 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        display: ["Fraunces", "Georgia", "serif"],
-        sans: ["Bricolage Grotesque", "system-ui", "sans-serif"],
+        display: ["Cinzel", "Georgia", "serif"],
+        sans: ["Plus Jakarta Sans", "system-ui", "sans-serif"],
       },
       colors: {
         background: "oklch(var(--background) / <alpha-value>)",
