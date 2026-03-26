@@ -628,28 +628,53 @@ function ManageEventsTab() {
       toast.error("Please enter a valid date and time");
       return;
     }
-    try {
-      const dateNs = BigInt(parsedDate.getTime()) * 1_000_000n;
-      await addEvent({
-        title: title.trim(),
-        date: dateNs,
-        location: location.trim(),
-        price: priceBigInt,
-      });
-      toast.success("Event uploaded! It's now visible to everyone.");
-      setTitle("");
-      setDateTime("");
-      setLocation("");
-      setPrice("");
-    } catch (err) {
-      const message = err instanceof Error ? err.message : String(err);
-      if (message.includes("stopped") || message.includes("IC0508")) {
-        toast.error(
-          "Upload failed: server is restarting, please try again in a moment.",
-        );
-      } else {
-        toast.error(`Upload failed: ${message}`);
+    const MAX_RETRIES = 5;
+    const RETRY_DELAYS = [2000, 4000, 6000, 8000, 10000];
+    const dateNs = BigInt(parsedDate.getTime()) * 1_000_000n;
+    const payload = {
+      title: title.trim(),
+      date: dateNs,
+      location: location.trim(),
+      price: priceBigInt,
+    };
+    let lastError = "";
+    for (let attempt = 0; attempt < MAX_RETRIES; attempt++) {
+      try {
+        await addEvent(payload);
+        toast.success("Event uploaded! It's now visible to everyone.");
+        setTitle("");
+        setDateTime("");
+        setLocation("");
+        setPrice("");
+        return;
+      } catch (err) {
+        lastError = err instanceof Error ? err.message : String(err);
+        const isServerRestart =
+          lastError.includes("stopped") ||
+          lastError.includes("IC0508") ||
+          lastError.includes("restarting");
+        if (isServerRestart && attempt < MAX_RETRIES - 1) {
+          toast.info(
+            `Server is restarting... retrying (${attempt + 1}/${MAX_RETRIES - 1})`,
+          );
+          await new Promise((resolve) =>
+            setTimeout(resolve, RETRY_DELAYS[attempt]),
+          );
+          continue;
+        }
+        break;
       }
+    }
+    if (
+      lastError.includes("stopped") ||
+      lastError.includes("IC0508") ||
+      lastError.includes("restarting")
+    ) {
+      toast.error(
+        "Server is still restarting after several attempts. Please wait a minute and try again.",
+      );
+    } else {
+      toast.error(`Upload failed: ${lastError}`);
     }
   };
 
