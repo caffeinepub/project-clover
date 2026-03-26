@@ -1,60 +1,54 @@
+@import url("https://fonts.googleapis.com/css2?family=Cinzel:wght@400;500;600;700;800;900&family=Raleway:wght@300;400;500;600;700&display=swap");
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 @font-face {
-  font-family: "Bricolage Grotesque";
-  src: url("/assets/fonts/BricolageGrotesque.woff2") format("woff2");
-  font-weight: 200 800;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "Fraunces";
-  src: url("/assets/fonts/Fraunces.woff2") format("woff2");
-  font-weight: 300 900;
-  font-style: normal;
+  font-family: "Playfair Display";
+  src: url("/assets/fonts/PlayfairDisplay.woff2") format("woff2");
+  font-weight: 400 800;
   font-display: swap;
 }
 
 @layer base {
   :root {
     --radius: 0.75rem;
-    /* Deep cool-tinted near-black */
-    --background: 0.07 0.012 240;
-    --foreground: 0.97 0.005 240;
-    --card: 0.1 0.015 240;
-    --card-foreground: 0.97 0.005 240;
-    --popover: 0.1 0.015 240;
-    --popover-foreground: 0.97 0.005 240;
-    /* Electric neon green — high chroma */
-    --primary: 0.82 0.29 142;
-    --primary-foreground: 0.06 0.01 240;
-    --secondary: 0.14 0.02 240;
-    --secondary-foreground: 0.97 0.005 240;
-    --muted: 0.12 0.015 240;
-    --muted-foreground: 0.52 0.02 240;
-    /* Gold accent for contrast moments */
-    --accent: 0.78 0.18 80;
-    --accent-foreground: 0.06 0.01 240;
+    /* Deep indigo/violet near-black */
+    --background: 0.08 0.04 280;
+    --foreground: 0.95 0.02 85;
+    --card: 0.12 0.06 280;
+    --card-foreground: 0.95 0.02 85;
+    --popover: 0.12 0.06 280;
+    --popover-foreground: 0.95 0.02 85;
+    /* Rich gold primary */
+    --primary: 0.82 0.16 85;
+    --primary-foreground: 0.08 0.04 280;
+    --secondary: 0.16 0.06 280;
+    --secondary-foreground: 0.95 0.02 85;
+    --muted: 0.14 0.05 280;
+    --muted-foreground: 0.55 0.05 280;
+    /* Rose gold accent */
+    --accent: 0.75 0.12 30;
+    --accent-foreground: 0.08 0.04 280;
     --destructive: 0.63 0.25 25;
-    --destructive-foreground: 0.97 0.005 240;
-    --border: 0.82 0.29 142 / 25%;
-    --input: 0.14 0.018 240;
-    --ring: 0.82 0.29 142;
-    --chart-1: 0.82 0.29 142;
-    --chart-2: 0.72 0.22 160;
-    --chart-3: 0.65 0.18 185;
-    --chart-4: 0.85 0.2 100;
-    --chart-5: 0.6 0.22 120;
-    --sidebar: 0.09 0.012 240;
-    --sidebar-foreground: 0.97 0.005 240;
-    --sidebar-primary: 0.82 0.29 142;
-    --sidebar-primary-foreground: 0.06 0.01 240;
-    --sidebar-accent: 0.14 0.018 240;
-    --sidebar-accent-foreground: 0.97 0.005 240;
-    --sidebar-border: 0.82 0.29 142 / 20%;
-    --sidebar-ring: 0.82 0.29 142;
+    --destructive-foreground: 0.97 0.005 280;
+    --border: 0.82 0.16 85 / 25%;
+    --input: 0.16 0.06 280;
+    --ring: 0.82 0.16 85;
+    --chart-1: 0.82 0.16 85;
+    --chart-2: 0.75 0.12 30;
+    --chart-3: 0.88 0.18 85;
+    --chart-4: 0.65 0.1 60;
+    --chart-5: 0.55 0.08 280;
+    --sidebar: 0.09 0.04 280;
+    --sidebar-foreground: 0.95 0.02 85;
+    --sidebar-primary: 0.82 0.16 85;
+    --sidebar-primary-foreground: 0.08 0.04 280;
+    --sidebar-accent: 0.16 0.06 280;
+    --sidebar-accent-foreground: 0.95 0.02 85;
+    --sidebar-border: 0.82 0.16 85 / 20%;
+    --sidebar-ring: 0.82 0.16 85;
   }
 
   * {
@@ -62,27 +56,37 @@
   }
   body {
     @apply bg-background text-foreground;
-    font-family: "Bricolage Grotesque", system-ui, sans-serif;
+    font-family: "Raleway", system-ui, sans-serif;
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: "Cinzel", Georgia, serif;
   }
 }
 
 /* ── Animated gradient mesh background ─────────────────────────────────── */
 .bg-mesh {
-  background-color: oklch(0.07 0.012 240);
+  background-color: oklch(0.08 0.04 280);
   background-image: radial-gradient(
       ellipse 60% 50% at 20% 10%,
-      oklch(0.82 0.29 142 / 0.06) 0%,
+      oklch(0.82 0.16 85 / 0.06) 0%,
       transparent 60%
     ),
     radial-gradient(
       ellipse 40% 35% at 80% 90%,
-      oklch(0.82 0.29 142 / 0.05) 0%,
+      oklch(0.75 0.12 30 / 0.05) 0%,
       transparent 55%
     ),
     radial-gradient(
       ellipse 30% 25% at 70% 20%,
-      oklch(0.78 0.18 80 / 0.04) 0%,
+      oklch(0.82 0.16 85 / 0.04) 0%,
       transparent 50%
+    ),
+    radial-gradient(
+      ellipse 50% 40% at 50% 100%,
+      oklch(0.35 0.12 280 / 0.15) 0%,
+      transparent 60%
     );
 }
 
@@ -131,24 +135,24 @@
 @keyframes pulse-glow {
   0%,
   100% {
-    box-shadow: 0 0 10px oklch(0.82 0.29 142 / 0.35), 0 0 24px
-      oklch(0.82 0.29 142 / 0.12);
+    box-shadow: 0 0 10px oklch(0.82 0.16 85 / 0.35), 0 0 24px
+      oklch(0.82 0.16 85 / 0.12);
   }
   50% {
-    box-shadow: 0 0 22px oklch(0.82 0.29 142 / 0.7), 0 0 48px
-      oklch(0.82 0.29 142 / 0.25);
+    box-shadow: 0 0 22px oklch(0.82 0.16 85 / 0.7), 0 0 48px
+      oklch(0.82 0.16 85 / 0.25);
   }
 }
 
 @keyframes pulse-glow-text {
   0%,
   100% {
-    text-shadow: 0 0 12px oklch(0.82 0.29 142 / 0.6), 0 0 40px
-      oklch(0.82 0.29 142 / 0.3);
+    text-shadow: 0 0 12px oklch(0.82 0.16 85 / 0.6), 0 0 40px
+      oklch(0.82 0.16 85 / 0.3);
   }
   50% {
-    text-shadow: 0 0 22px oklch(0.82 0.29 142 / 0.9), 0 0 70px
-      oklch(0.82 0.29 142 / 0.5);
+    text-shadow: 0 0 22px oklch(0.82 0.16 85 / 0.9), 0 0 70px
+      oklch(0.82 0.16 85 / 0.5);
   }
 }
 
@@ -192,22 +196,22 @@
 @keyframes neon-border-pulse {
   0%,
   100% {
-    border-color: oklch(0.82 0.29 142 / 0.35);
-    box-shadow: 0 0 8px oklch(0.82 0.29 142 / 0.2);
+    border-color: oklch(0.82 0.16 85 / 0.35);
+    box-shadow: 0 0 8px oklch(0.82 0.16 85 / 0.2);
   }
   50% {
-    border-color: oklch(0.82 0.29 142 / 0.65);
-    box-shadow: 0 0 20px oklch(0.82 0.29 142 / 0.35);
+    border-color: oklch(0.82 0.16 85 / 0.65);
+    box-shadow: 0 0 20px oklch(0.82 0.16 85 / 0.35);
   }
 }
 
 @keyframes hero-glow {
   0%,
   100% {
-    filter: drop-shadow(0 0 18px oklch(0.82 0.29 142 / 0.5));
+    filter: drop-shadow(0 0 18px oklch(0.82 0.16 85 / 0.5));
   }
   50% {
-    filter: drop-shadow(0 0 40px oklch(0.82 0.29 142 / 0.8));
+    filter: drop-shadow(0 0 40px oklch(0.82 0.16 85 / 0.8));
   }
 }
 
@@ -236,12 +240,7 @@
 
 /* ── Gradient text ──────────────────────────────────────────────────────── */
 .text-gradient-green {
-  background: linear-gradient(
-    135deg,
-    oklch(0.82 0.29 142),
-    oklch(0.9 0.22 155),
-    oklch(0.76 0.28 130)
-  );
+  background: linear-gradient(135deg, oklch(0.92 0.18 85), oklch(0.75 0.14 45));
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -249,11 +248,11 @@
 
 .text-gradient-hero {
   background: linear-gradient(
-    120deg,
-    oklch(0.88 0.28 148) 0%,
-    oklch(0.96 0.2 160) 30%,
-    oklch(0.82 0.3 135) 60%,
-    oklch(0.9 0.25 142) 100%
+    135deg,
+    oklch(0.92 0.18 85) 0%,
+    oklch(0.85 0.16 65) 30%,
+    oklch(0.75 0.14 45) 60%,
+    oklch(0.88 0.18 85) 100%
   );
   background-size: 300% 100%;
   -webkit-background-clip: text;
@@ -264,17 +263,15 @@
 
 /* ── Glass morphism ─────────────────────────────────────────────────────── */
 .glass {
-  background: oklch(0.1 0.015 240 / 0.75);
+  background: oklch(0.12 0.06 280 / 0.75);
   backdrop-filter: blur(16px) saturate(1.4);
   -webkit-backdrop-filter: blur(16px) saturate(1.4);
 }
 
 .glass-nav {
-  background: oklch(0.07 0.012 240 / 0.85);
-  backdrop-filter: blur(20px) saturate(1.6);
-  -webkit-backdrop-filter: blur(20px) saturate(1.6);
-  border-bottom: 1px solid oklch(0.82 0.29 142 / 0.2);
-  box-shadow: 0 1px 0 oklch(0.82 0.29 142 / 0.08), 0 8px 32px oklch(0 0 0 / 0.4);
+  background: oklch(0.06 0.04 280 / 0.95);
+  border-bottom: 1px solid oklch(0.82 0.16 85 / 0.3);
+  box-shadow: 0 1px 0 oklch(0.82 0.16 85 / 0.1), 0 8px 32px oklch(0 0 0 / 0.5);
 }
 
 /* ── Glow button ────────────────────────────────────────────────────────── */
@@ -283,8 +280,8 @@
   transition: box-shadow 0.2s ease, transform 0.15s ease;
 }
 .btn-glow:hover {
-  box-shadow: 0 0 22px oklch(0.82 0.29 142 / 0.65), 0 0 50px
-    oklch(0.82 0.29 142 / 0.3);
+  box-shadow: 0 0 22px oklch(0.82 0.16 85 / 0.65), 0 0 50px
+    oklch(0.82 0.16 85 / 0.3);
 }
 
 /* ── Neon card border on hover ──────────────────────────────────────────── */
@@ -292,9 +289,8 @@
   transition: border-color 0.25s ease, box-shadow 0.25s ease;
 }
 .card-neon:hover {
-  border-color: oklch(0.82 0.29 142 / 0.6) !important;
-  box-shadow: 0 0 20px oklch(0.82 0.29 142 / 0.22), 0 8px 40px
-    oklch(0 0 0 / 0.5);
+  border-color: oklch(0.82 0.16 85 / 0.6) !important;
+  box-shadow: 0 0 20px oklch(0.82 0.16 85 / 0.22), 0 8px 40px oklch(0 0 0 / 0.5);
 }
 
 /* ── Scanline overlay on ticket ────────────────────────────────────────── */
@@ -305,7 +301,7 @@
   background: linear-gradient(
     180deg,
     transparent 40%,
-    oklch(0.82 0.29 142 / 0.05) 50%,
+    oklch(0.82 0.16 85 / 0.05) 50%,
     transparent 60%
   );
   pointer-events: none;

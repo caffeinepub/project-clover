@@ -50,7 +50,7 @@ function Sparkle({ x, y, delay }: { x: string; y: string; delay: number }) {
         <title>sparkle</title>
         <path
           d="M10 0L11.5 8.5L20 10L11.5 11.5L10 20L8.5 11.5L0 10L8.5 8.5L10 0Z"
-          fill="oklch(0.72 0.2 142)"
+          fill="oklch(0.82 0.16 85 / 0.7)"
         />
       </svg>
     </motion.div>
@@ -79,7 +79,7 @@ export function SplashScreen({ onDone }: { onDone: () => void }) {
   return (
     <motion.div
       className="fixed inset-0 z-[100] flex flex-col items-center justify-center overflow-hidden cursor-pointer select-none"
-      style={{ background: "oklch(0.08 0.02 142)" }}
+      style={{ background: "oklch(0.06 0.04 280)" }}
       animate={exiting ? { opacity: 0, scale: 1.05 } : { opacity: 1, scale: 1 }}
       transition={{ duration: 0.6, ease: "easeInOut" }}
       onClick={dismiss}
@@ -92,7 +92,7 @@ export function SplashScreen({ onDone }: { onDone: () => void }) {
         transition={{ duration: 1.5, ease: "easeOut" }}
         style={{
           background:
-            "radial-gradient(ellipse 60% 50% at 50% 50%, oklch(0.5 0.18 142 / 0.35), transparent)",
+            "radial-gradient(ellipse 60% 50% at 50% 50%, oklch(0.5 0.14 85 / 0.35), transparent)",
         }}
       />
 
@@ -130,7 +130,7 @@ export function SplashScreen({ onDone }: { onDone: () => void }) {
         initial={{ scale: 0, rotate: -180, opacity: 0 }}
         animate={{ scale: [0, 1.3, 1], rotate: [-180, 20, 0], opacity: 1 }}
         transition={{ duration: 0.9, ease: "backOut" }}
-        style={{ filter: "drop-shadow(0 0 30px oklch(0.6 0.22 142 / 0.9))" }}
+        style={{ filter: "drop-shadow(0 0 30px oklch(0.82 0.16 85 / 0.9))" }}
       >
         🍀
       </motion.div>
@@ -145,7 +145,7 @@ export function SplashScreen({ onDone }: { onDone: () => void }) {
           width: 160,
           height: 160,
           background:
-            "radial-gradient(circle, oklch(0.65 0.22 142 / 0.5), transparent 70%)",
+            "radial-gradient(circle, oklch(0.65 0.16 85 / 0.5), transparent 70%)",
           marginTop: -280,
         }}
       />
@@ -154,13 +154,13 @@ export function SplashScreen({ onDone }: { onDone: () => void }) {
       <motion.h1
         className="text-center leading-tight"
         style={{
-          fontFamily: "Bricolage Grotesque, sans-serif",
+          fontFamily: "'Cinzel', Georgia, serif",
           fontSize: "clamp(2.5rem, 8vw, 5rem)",
           fontWeight: 800,
-          color: "oklch(0.97 0.04 142)",
+          color: "oklch(0.95 0.02 85)",
           textShadow:
-            "0 0 40px oklch(0.65 0.22 142 / 0.8), 0 0 80px oklch(0.55 0.2 142 / 0.4)",
-          letterSpacing: "-0.02em",
+            "0 0 40px oklch(0.65 0.16 85 / 0.8), 0 0 80px oklch(0.55 0.14 85 / 0.4)",
+          letterSpacing: "0.05em",
         }}
         initial={{ opacity: 0, y: 30, scale: 0.8 }}
         animate={{ opacity: 1, y: 0, scale: 1 }}
@@ -172,7 +172,11 @@ export function SplashScreen({ onDone }: { onDone: () => void }) {
       {/* Subtitle */}
       <motion.p
         className="mt-3 text-lg tracking-widest uppercase"
-        style={{ color: "oklch(0.65 0.18 142)", letterSpacing: "0.25em" }}
+        style={{
+          color: "oklch(0.65 0.14 85)",
+          letterSpacing: "0.25em",
+          fontFamily: "'Raleway', sans-serif",
+        }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 1.1, duration: 0.6 }}
@@ -183,7 +187,10 @@ export function SplashScreen({ onDone }: { onDone: () => void }) {
       {/* Tap to skip hint */}
       <motion.p
         className="absolute bottom-10 text-xs uppercase tracking-widest"
-        style={{ color: "oklch(0.45 0.1 142)" }}
+        style={{
+          color: "oklch(0.45 0.1 85)",
+          fontFamily: "'Raleway', sans-serif",
+        }}
         initial={{ opacity: 0 }}
         animate={{ opacity: [0, 0.7, 0.5] }}
         transition={{ delay: 1.4, duration: 0.8 }}
@@ -194,7 +201,10 @@ export function SplashScreen({ onDone }: { onDone: () => void }) {
       {/* Bottom shimmer bar */}
       <motion.div
         className="absolute bottom-0 left-0 right-0 h-1"
-        style={{ background: "oklch(0.55 0.22 142)" }}
+        style={{
+          background:
+            "linear-gradient(90deg, oklch(0.55 0.14 85), oklch(0.82 0.16 85), oklch(0.55 0.14 85))",
+        }}
         initial={{ scaleX: 0, transformOrigin: "left" }}
         animate={{ scaleX: 1 }}
         transition={{ delay: 0.3, duration: 2.4, ease: "easeInOut" }}

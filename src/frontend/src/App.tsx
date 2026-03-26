@@ -46,17 +46,17 @@ function CloveSVG({ size, opacity }: { size: number; opacity: number }) {
       role="img"
     >
       <title>Clover</title>
-      <circle cx="10" cy="10" r="7" fill="oklch(0.82 0.29 142 / 0.6)" />
-      <circle cx="22" cy="10" r="7" fill="oklch(0.82 0.29 142 / 0.6)" />
-      <circle cx="10" cy="22" r="7" fill="oklch(0.82 0.29 142 / 0.6)" />
-      <circle cx="22" cy="22" r="7" fill="oklch(0.82 0.29 142 / 0.6)" />
+      <circle cx="10" cy="10" r="7" fill="oklch(0.82 0.16 85 / 0.6)" />
+      <circle cx="22" cy="10" r="7" fill="oklch(0.82 0.16 85 / 0.6)" />
+      <circle cx="10" cy="22" r="7" fill="oklch(0.82 0.16 85 / 0.6)" />
+      <circle cx="22" cy="22" r="7" fill="oklch(0.82 0.16 85 / 0.6)" />
       <rect
         x="14"
         y="22"
         width="4"
         height="8"
         rx="2"
-        fill="oklch(0.82 0.29 142 / 0.5)"
+        fill="oklch(0.82 0.16 85 / 0.5)"
       />
     </svg>
   );
@@ -139,10 +139,10 @@ function StatusBadge({ status }: { status: ReservationStatus }) {
       <Badge
         className="font-bold"
         style={{
-          background: "oklch(0.82 0.29 142 / 0.15)",
-          color: "oklch(0.88 0.28 142)",
-          border: "1px solid oklch(0.82 0.29 142 / 0.5)",
-          boxShadow: "0 0 8px oklch(0.82 0.29 142 / 0.3)",
+          background: "oklch(0.82 0.16 85 / 0.15)",
+          color: "oklch(0.92 0.18 85)",
+          border: "1px solid oklch(0.82 0.16 85 / 0.5)",
+          boxShadow: "0 0 8px oklch(0.82 0.16 85 / 0.3)",
         }}
       >
         ✓ Approved
@@ -201,7 +201,7 @@ function EventCard({
       <div
         className="relative flex rounded-xl overflow-visible card-neon"
         style={{
-          filter: "drop-shadow(0 4px 40px oklch(0.82 0.29 142 / 0.22))",
+          filter: "drop-shadow(0 4px 40px oklch(0.82 0.16 85 / 0.22))",
           transition: "filter 0.3s ease",
         }}
       >
@@ -209,9 +209,9 @@ function EventCard({
         <div
           className="flex-1 relative overflow-hidden group ticket-scanline"
           style={{
-            background: "oklch(0.10 0.016 240)",
+            background: "oklch(0.12 0.06 280)",
             borderRadius: "12px 0 0 12px",
-            border: "1px solid oklch(0.82 0.29 142 / 0.30)",
+            border: "1px solid oklch(0.82 0.16 85 / 0.30)",
             borderRight: "none",
           }}
         >
@@ -220,8 +220,8 @@ function EventCard({
             className="absolute inset-0 pointer-events-none opacity-[0.03]"
             style={{
               backgroundImage:
-                "repeating-linear-gradient(45deg, oklch(0.82 0.29 142) 0px, oklch(0.82 0.29 142) 1px, transparent 1px, transparent 8px)," +
-                "repeating-linear-gradient(-45deg, oklch(0.82 0.29 142) 0px, oklch(0.82 0.29 142) 1px, transparent 1px, transparent 8px)",
+                "repeating-linear-gradient(45deg, oklch(0.82 0.16 85) 0px, oklch(0.82 0.16 85) 1px, transparent 1px, transparent 8px)," +
+                "repeating-linear-gradient(-45deg, oklch(0.82 0.16 85) 0px, oklch(0.82 0.16 85) 1px, transparent 1px, transparent 8px)",
             }}
           />
 
@@ -230,7 +230,7 @@ function EventCard({
             className="absolute inset-0 pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity duration-500"
             style={{
               background:
-                "linear-gradient(105deg, transparent 30%, oklch(0.82 0.29 142 / 0.08) 50%, transparent 70%)",
+                "linear-gradient(105deg, transparent 30%, oklch(0.82 0.16 85 / 0.08) 50%, transparent 70%)",
               backgroundSize: "200% 100%",
             }}
           />
@@ -240,7 +240,7 @@ function EventCard({
             className="absolute -top-8 -left-8 w-28 h-28 rounded-full pointer-events-none"
             style={{
               background:
-                "radial-gradient(circle, oklch(0.82 0.29 142 / 0.10) 0%, transparent 70%)",
+                "radial-gradient(circle, oklch(0.82 0.16 85 / 0.10) 0%, transparent 70%)",
             }}
           />
 
@@ -250,16 +250,16 @@ function EventCard({
               <span
                 className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-full"
                 style={{
-                  background: "oklch(0.82 0.29 142 / 0.12)",
-                  color: "oklch(0.88 0.28 142)",
-                  border: "1px solid oklch(0.82 0.29 142 / 0.28)",
+                  background: "oklch(0.82 0.16 85 / 0.12)",
+                  color: "oklch(0.92 0.18 85)",
+                  border: "1px solid oklch(0.82 0.16 85 / 0.28)",
                 }}
               >
                 🍀 IMVU Event
               </span>
               <span
                 className="text-[10px] font-mono"
-                style={{ color: "oklch(0.45 0.02 240)" }}
+                style={{ color: "oklch(0.45 0.05 280)" }}
               >
                 {ticketNum}
               </span>
@@ -269,9 +269,9 @@ function EventCard({
             <h3
               className="text-2xl font-bold italic leading-tight mb-4"
               style={{
-                fontFamily: "Fraunces, Georgia, serif",
-                color: "oklch(0.97 0.005 240)",
-                textShadow: "0 0 24px oklch(0.82 0.29 142 / 0.2)",
+                fontFamily: "Cinzel, Georgia, serif",
+                color: "oklch(0.95 0.02 85)",
+                textShadow: "0 0 24px oklch(0.82 0.16 85 / 0.2)",
               }}
             >
               {event.title}
@@ -282,16 +282,16 @@ function EventCard({
               <div className="flex items-center gap-2">
                 <CalendarDays
                   className="w-3.5 h-3.5 shrink-0"
-                  style={{ color: "oklch(0.82 0.29 142)" }}
+                  style={{ color: "oklch(0.82 0.16 85)" }}
                 />
                 <span
                   className="text-xs"
-                  style={{ color: "oklch(0.60 0.02 240)" }}
+                  style={{ color: "oklch(0.60 0.05 280)" }}
                 >
                   {date}{" "}
                   <span
                     className="font-semibold"
-                    style={{ color: "oklch(0.85 0.18 142)" }}
+                    style={{ color: "oklch(0.88 0.16 85)" }}
                   >
                     @ {time}
                   </span>
@@ -300,11 +300,11 @@ function EventCard({
               <div className="flex items-center gap-2">
                 <MapPin
                   className="w-3.5 h-3.5 shrink-0"
-                  style={{ color: "oklch(0.82 0.29 142)" }}
+                  style={{ color: "oklch(0.82 0.16 85)" }}
                 />
                 <span
                   className="text-xs"
-                  style={{ color: "oklch(0.60 0.02 240)" }}
+                  style={{ color: "oklch(0.60 0.05 280)" }}
                 >
                   {event.location}
                 </span>
@@ -316,16 +316,16 @@ function EventCard({
               <div>
                 <p
                   className="text-[10px] uppercase tracking-wider mb-0.5"
-                  style={{ color: "oklch(0.45 0.02 240)" }}
+                  style={{ color: "oklch(0.45 0.05 280)" }}
                 >
                   Price
                 </p>
                 <p
                   className="text-xl font-bold"
                   style={{
-                    fontFamily: "Fraunces, Georgia, serif",
-                    color: "oklch(0.88 0.28 142)",
-                    textShadow: "0 0 12px oklch(0.82 0.29 142 / 0.4)",
+                    fontFamily: "Cinzel, Georgia, serif",
+                    color: "oklch(0.92 0.18 85)",
+                    textShadow: "0 0 12px oklch(0.82 0.16 85 / 0.4)",
                   }}
                 >
                   {event.price === 0n
@@ -338,8 +338,8 @@ function EventCard({
                 className="btn-glow animate-pulse-glow inline-flex items-center gap-1.5 font-bold text-sm px-5 py-2.5 rounded-xl"
                 style={{
                   background:
-                    "linear-gradient(135deg, oklch(0.85 0.28 142), oklch(0.75 0.26 150))",
-                  color: "oklch(0.06 0.01 240)",
+                    "linear-gradient(135deg, oklch(0.88 0.18 85), oklch(0.72 0.14 65))",
+                  color: "oklch(0.08 0.04 280)",
                 }}
                 whileHover={{ scale: 1.08 }}
                 whileTap={{ scale: 0.95 }}
@@ -362,8 +362,8 @@ function EventCard({
             width: "16px",
             height: "16px",
             borderRadius: "50%",
-            background: "oklch(0.07 0.012 240)",
-            border: "1px solid oklch(0.14 0.018 240)",
+            background: "oklch(0.08 0.04 280)",
+            border: "1px solid oklch(0.16 0.06 280)",
           }}
         />
         {/* Perforation notch bottom */}
@@ -375,8 +375,8 @@ function EventCard({
             width: "16px",
             height: "16px",
             borderRadius: "50%",
-            background: "oklch(0.07 0.012 240)",
-            border: "1px solid oklch(0.14 0.018 240)",
+            background: "oklch(0.08 0.04 280)",
+            border: "1px solid oklch(0.16 0.06 280)",
           }}
         />
 
@@ -384,9 +384,9 @@ function EventCard({
         <div
           className="w-[72px] shrink-0 flex flex-col items-center justify-between relative overflow-hidden"
           style={{
-            background: "oklch(0.12 0.022 142)",
+            background: "oklch(0.14 0.06 280)",
             borderRadius: "0 12px 12px 0",
-            border: "1px solid oklch(0.82 0.29 142 / 0.3)",
+            border: "1px solid oklch(0.82 0.16 85 / 0.3)",
             borderLeft: "none",
           }}
         >
@@ -394,7 +394,7 @@ function EventCard({
           <div
             className="absolute left-0 top-4 bottom-4"
             style={{
-              borderLeft: "2px dashed oklch(0.82 0.29 142 / 0.35)",
+              borderLeft: "2px dashed oklch(0.82 0.16 85 / 0.35)",
             }}
           />
 
@@ -403,7 +403,7 @@ function EventCard({
             className="absolute inset-0 pointer-events-none"
             style={{
               background:
-                "radial-gradient(ellipse at center, oklch(0.82 0.29 142 / 0.09) 0%, transparent 70%)",
+                "radial-gradient(ellipse at center, oklch(0.82 0.16 85 / 0.09) 0%, transparent 70%)",
             }}
           />
 
@@ -414,7 +414,7 @@ function EventCard({
           >
             <span
               className="text-[9px] font-bold uppercase tracking-[0.25em]"
-              style={{ color: "oklch(0.82 0.29 142 / 0.75)" }}
+              style={{ color: "oklch(0.82 0.16 85 / 0.75)" }}
             >
               ADMIT ONE
             </span>
@@ -493,8 +493,8 @@ function ReservationForm({
       <h2
         className="text-3xl font-bold italic mb-1"
         style={{
-          fontFamily: "Fraunces, Georgia, serif",
-          color: "oklch(0.97 0.005 240)",
+          fontFamily: "Cinzel, Georgia, serif",
+          color: "oklch(0.95 0.02 85)",
         }}
       >
         Reserve Ticket
@@ -505,14 +505,14 @@ function ReservationForm({
 
       <Card
         className="border mb-6 glass"
-        style={{ borderColor: "oklch(0.82 0.29 142 / 0.25)" }}
+        style={{ borderColor: "oklch(0.82 0.16 85 / 0.25)" }}
       >
         <CardContent className="p-4 space-y-1">
           <p
             className="font-bold text-lg italic"
             style={{
-              fontFamily: "Fraunces, Georgia, serif",
-              color: "oklch(0.97 0.005 240)",
+              fontFamily: "Cinzel, Georgia, serif",
+              color: "oklch(0.95 0.02 85)",
             }}
           >
             {event.title}
@@ -523,8 +523,8 @@ function ReservationForm({
           <p
             className="font-bold text-xl"
             style={{
-              color: "oklch(0.88 0.28 142)",
-              fontFamily: "Fraunces, Georgia, serif",
+              color: "oklch(0.92 0.18 85)",
+              fontFamily: "Cinzel, Georgia, serif",
             }}
           >
             {event.price === 0n ? "Free" : `${event.price.toString()} credits`}
@@ -535,26 +535,26 @@ function ReservationForm({
       <div
         className="rounded-xl p-4 mb-6 space-y-2"
         style={{
-          background: "oklch(0.82 0.29 142 / 0.08)",
-          border: "1px solid oklch(0.82 0.29 142 / 0.3)",
-          boxShadow: "inset 0 0 20px oklch(0.82 0.29 142 / 0.05)",
+          background: "oklch(0.82 0.16 85 / 0.08)",
+          border: "1px solid oklch(0.82 0.16 85 / 0.3)",
+          boxShadow: "inset 0 0 20px oklch(0.82 0.16 85 / 0.05)",
         }}
       >
         <p
           className="text-sm font-semibold"
-          style={{ color: "oklch(0.88 0.28 142)" }}
+          style={{ color: "oklch(0.92 0.18 85)" }}
         >
           💳 Payment Instructions
         </p>
         <p className="text-sm text-foreground">
           Send credits via IMVU to:{" "}
-          <span className="font-bold" style={{ color: "oklch(0.88 0.28 142)" }}>
+          <span className="font-bold" style={{ color: "oklch(0.92 0.18 85)" }}>
             {recipientUsername}
           </span>
         </p>
         <p className="text-sm text-foreground">
           Include note:{" "}
-          <span className="font-bold" style={{ color: "oklch(0.88 0.28 142)" }}>
+          <span className="font-bold" style={{ color: "oklch(0.92 0.18 85)" }}>
             CLOVER{event.id.toString()}
           </span>
         </p>
@@ -601,8 +601,8 @@ function ReservationForm({
           className="w-full btn-glow font-bold text-base py-3 rounded-xl"
           style={{
             background:
-              "linear-gradient(135deg, oklch(0.85 0.28 142), oklch(0.75 0.26 150))",
-            color: "oklch(0.06 0.01 240)",
+              "linear-gradient(135deg, oklch(0.88 0.18 85), oklch(0.72 0.14 65))",
+            color: "oklch(0.08 0.04 280)",
           }}
           onClick={handleSubmit}
           disabled={isPending}
@@ -655,14 +655,14 @@ function Confirmation({ onBack }: { onBack: () => void }) {
         initial={{ scale: 0, rotate: -180 }}
         animate={{ scale: 1, rotate: 0 }}
         transition={{ type: "spring", stiffness: 180, damping: 12, delay: 0.1 }}
-        style={{ filter: "drop-shadow(0 0 30px oklch(0.82 0.29 142 / 0.85))" }}
+        style={{ filter: "drop-shadow(0 0 30px oklch(0.82 0.16 85 / 0.85))" }}
       >
         🍀
       </motion.div>
 
       <motion.h2
         className="text-4xl font-bold italic mb-3 text-gradient-green"
-        style={{ fontFamily: "Fraunces, Georgia, serif" }}
+        style={{ fontFamily: "Cinzel, Georgia, serif" }}
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ delay: 0.3 }}
@@ -671,7 +671,7 @@ function Confirmation({ onBack }: { onBack: () => void }) {
       </motion.h2>
       <motion.p
         className="text-lg font-semibold mb-2"
-        style={{ color: "oklch(0.88 0.28 142)" }}
+        style={{ color: "oklch(0.92 0.18 85)" }}
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         transition={{ delay: 0.45 }}
@@ -696,8 +696,8 @@ function Confirmation({ onBack }: { onBack: () => void }) {
           className="btn-glow font-bold px-8 py-3 text-base rounded-xl"
           style={{
             background:
-              "linear-gradient(135deg, oklch(0.85 0.28 142), oklch(0.75 0.26 150))",
-            color: "oklch(0.06 0.01 240)",
+              "linear-gradient(135deg, oklch(0.88 0.18 85), oklch(0.72 0.14 65))",
+            color: "oklch(0.08 0.04 280)",
           }}
           onClick={onBack}
           data-ocid="confirm.back.button"
@@ -740,8 +740,8 @@ function LookupView() {
       <h2
         className="text-3xl font-bold italic mb-6"
         style={{
-          fontFamily: "Fraunces, Georgia, serif",
-          color: "oklch(0.97 0.005 240)",
+          fontFamily: "Cinzel, Georgia, serif",
+          color: "oklch(0.95 0.02 85)",
         }}
       >
         Check My Reservation
@@ -763,8 +763,8 @@ function LookupView() {
           className="btn-glow shrink-0 font-semibold"
           style={{
             background:
-              "linear-gradient(135deg, oklch(0.85 0.28 142), oklch(0.75 0.26 150))",
-            color: "oklch(0.06 0.01 240)",
+              "linear-gradient(135deg, oklch(0.88 0.18 85), oklch(0.72 0.14 65))",
+            color: "oklch(0.08 0.04 280)",
           }}
           data-ocid="lookup.search.button"
         >
@@ -803,7 +803,7 @@ function LookupView() {
             <Card
               key={r.id.toString()}
               className="glass border card-neon"
-              style={{ borderColor: "oklch(0.82 0.29 142 / 0.22)" }}
+              style={{ borderColor: "oklch(0.82 0.16 85 / 0.22)" }}
               data-ocid={`lookup.item.${i + 1}`}
             >
               <CardContent className="p-4">
@@ -812,8 +812,8 @@ function LookupView() {
                     <p
                       className="font-bold text-lg italic"
                       style={{
-                        fontFamily: "Fraunces, Georgia, serif",
-                        color: "oklch(0.97 0.005 240)",
+                        fontFamily: "Cinzel, Georgia, serif",
+                        color: "oklch(0.95 0.02 85)",
                       }}
                     >
                       {r.eventDetails.title}
@@ -937,16 +937,16 @@ function ManageEventsTab() {
       {/* Upload form */}
       <Card
         className="glass border"
-        style={{ borderColor: "oklch(0.82 0.29 142 / 0.22)" }}
+        style={{ borderColor: "oklch(0.82 0.16 85 / 0.22)" }}
       >
         <CardHeader className="pb-3">
           <CardTitle
             className="text-lg flex items-center gap-2"
-            style={{ color: "oklch(0.97 0.005 240)" }}
+            style={{ color: "oklch(0.95 0.02 85)" }}
           >
             <Plus
               className="w-5 h-5"
-              style={{ color: "oklch(0.88 0.28 142)" }}
+              style={{ color: "oklch(0.92 0.18 85)" }}
             />
             Upload New Event
           </CardTitle>
@@ -1026,8 +1026,8 @@ function ManageEventsTab() {
             className="btn-glow w-full font-bold"
             style={{
               background:
-                "linear-gradient(135deg, oklch(0.85 0.28 142), oklch(0.75 0.26 150))",
-              color: "oklch(0.06 0.01 240)",
+                "linear-gradient(135deg, oklch(0.88 0.18 85), oklch(0.72 0.14 65))",
+              color: "oklch(0.08 0.04 280)",
             }}
             data-ocid="admin.upload_event.button"
           >
@@ -1048,7 +1048,7 @@ function ManageEventsTab() {
             <Skeleton
               key={i}
               className="h-14 w-full"
-              style={{ background: "oklch(0.14 0.018 240)" }}
+              style={{ background: "oklch(0.16 0.06 280)" }}
             />
           ))}
         </div>
@@ -1060,15 +1060,15 @@ function ManageEventsTab() {
             <div
               key={ev.id.toString()}
               className="flex items-center justify-between p-4 rounded-xl glass border"
-              style={{ borderColor: "oklch(0.82 0.29 142 / 0.18)" }}
+              style={{ borderColor: "oklch(0.82 0.16 85 / 0.18)" }}
               data-ocid={`admin.event.item.${i + 1}`}
             >
               <div>
                 <p
                   className="font-semibold italic"
                   style={{
-                    fontFamily: "Fraunces, Georgia, serif",
-                    color: "oklch(0.97 0.005 240)",
+                    fontFamily: "Cinzel, Georgia, serif",
+                    color: "oklch(0.95 0.02 85)",
                   }}
                 >
                   {ev.title}
@@ -1141,8 +1141,8 @@ function RecipientUsernameInput({
         className="mt-2 btn-glow w-full font-bold"
         style={{
           background:
-            "linear-gradient(135deg, oklch(0.85 0.28 142), oklch(0.75 0.26 150))",
-          color: "oklch(0.06 0.01 240)",
+            "linear-gradient(135deg, oklch(0.88 0.18 85), oklch(0.72 0.14 65))",
+          color: "oklch(0.08 0.04 280)",
         }}
         data-ocid="admin.recipient_done.button"
       >
@@ -1185,13 +1185,13 @@ function AdminPanel({ recipientUsername }: { recipientUsername: string }) {
       <div className="flex items-center gap-3 mb-1">
         <ShieldCheck
           className="w-6 h-6"
-          style={{ color: "oklch(0.88 0.28 142)" }}
+          style={{ color: "oklch(0.92 0.18 85)" }}
         />
         <h2
           className="text-3xl font-bold italic"
           style={{
-            fontFamily: "Fraunces, Georgia, serif",
-            color: "oklch(0.97 0.005 240)",
+            fontFamily: "Cinzel, Georgia, serif",
+            color: "oklch(0.95 0.02 85)",
           }}
         >
           Admin Panel
@@ -1206,8 +1206,8 @@ function AdminPanel({ recipientUsername }: { recipientUsername: string }) {
         <TabsList
           className="mb-6 flex gap-1 p-1 rounded-full"
           style={{
-            background: "oklch(0.10 0.015 240)",
-            border: "1px solid oklch(0.82 0.29 142 / 0.18)",
+            background: "oklch(0.12 0.06 280)",
+            border: "1px solid oklch(0.82 0.16 85 / 0.18)",
           }}
         >
           {[
@@ -1255,7 +1255,7 @@ function AdminPanel({ recipientUsername }: { recipientUsername: string }) {
                 <Skeleton
                   key={i}
                   className="h-12 w-full"
-                  style={{ background: "oklch(0.14 0.018 240)" }}
+                  style={{ background: "oklch(0.16 0.06 280)" }}
                 />
               ))}
             </div>
@@ -1278,7 +1278,7 @@ function AdminPanel({ recipientUsername }: { recipientUsername: string }) {
                   <TableRow
                     className="hover:bg-transparent"
                     style={{
-                      borderBottom: "1px solid oklch(0.82 0.29 142 / 0.15)",
+                      borderBottom: "1px solid oklch(0.82 0.16 85 / 0.15)",
                     }}
                   >
                     <TableHead className="text-muted-foreground">ID</TableHead>
@@ -1305,7 +1305,7 @@ function AdminPanel({ recipientUsername }: { recipientUsername: string }) {
                       key={r.id.toString()}
                       className="hover:bg-muted/30"
                       style={{
-                        borderBottom: "1px solid oklch(0.82 0.29 142 / 0.08)",
+                        borderBottom: "1px solid oklch(0.82 0.16 85 / 0.08)",
                       }}
                       data-ocid={`admin.row.${i + 1}`}
                     >
@@ -1332,9 +1332,9 @@ function AdminPanel({ recipientUsername }: { recipientUsername: string }) {
                               size="sm"
                               className="h-7 px-2 text-xs font-semibold"
                               style={{
-                                background: "oklch(0.82 0.29 142 / 0.15)",
-                                color: "oklch(0.88 0.28 142)",
-                                border: "1px solid oklch(0.82 0.29 142 / 0.35)",
+                                background: "oklch(0.82 0.16 85 / 0.15)",
+                                color: "oklch(0.92 0.18 85)",
+                                border: "1px solid oklch(0.82 0.16 85 / 0.35)",
                               }}
                               onClick={() =>
                                 handleUpdate(r.id, ReservationStatus.approved)
@@ -1391,18 +1391,18 @@ function AdminPanel({ recipientUsername }: { recipientUsername: string }) {
             <h3
               className="text-xl font-bold italic"
               style={{
-                fontFamily: "Fraunces, Georgia, serif",
-                color: "oklch(0.97 0.005 240)",
+                fontFamily: "Cinzel, Georgia, serif",
+                color: "oklch(0.95 0.02 85)",
               }}
             >
               Ticket Holders
             </h3>
             <Badge
               style={{
-                background: "oklch(0.82 0.29 142 / 0.15)",
-                color: "oklch(0.88 0.28 142)",
-                border: "1px solid oklch(0.82 0.29 142 / 0.4)",
-                boxShadow: "0 0 8px oklch(0.82 0.29 142 / 0.2)",
+                background: "oklch(0.82 0.16 85 / 0.15)",
+                color: "oklch(0.92 0.18 85)",
+                border: "1px solid oklch(0.82 0.16 85 / 0.4)",
+                boxShadow: "0 0 8px oklch(0.82 0.16 85 / 0.2)",
               }}
               className="text-sm px-3 py-1 font-bold"
             >
@@ -1419,7 +1419,7 @@ function AdminPanel({ recipientUsername }: { recipientUsername: string }) {
                 <Skeleton
                   key={i}
                   className="h-32 w-full"
-                  style={{ background: "oklch(0.14 0.018 240)" }}
+                  style={{ background: "oklch(0.16 0.06 280)" }}
                 />
               ))}
             </div>
@@ -1429,7 +1429,7 @@ function AdminPanel({ recipientUsername }: { recipientUsername: string }) {
             <div
               className="text-center py-16 text-muted-foreground rounded-xl"
               style={{
-                border: "1px dashed oklch(0.82 0.29 142 / 0.2)",
+                border: "1px dashed oklch(0.82 0.16 85 / 0.2)",
               }}
               data-ocid="admin.ticket_holders.empty_state"
             >
@@ -1456,7 +1456,7 @@ function AdminPanel({ recipientUsername }: { recipientUsername: string }) {
                   <Card
                     className="glass overflow-hidden card-neon"
                     style={{
-                      border: "1px solid oklch(0.82 0.29 142 / 0.25)",
+                      border: "1px solid oklch(0.82 0.16 85 / 0.25)",
                     }}
                   >
                     {/* Neon top accent bar */}
@@ -1464,8 +1464,8 @@ function AdminPanel({ recipientUsername }: { recipientUsername: string }) {
                       className="h-[2px] w-full"
                       style={{
                         background:
-                          "linear-gradient(90deg, transparent, oklch(0.88 0.28 142), transparent)",
-                        boxShadow: "0 0 8px oklch(0.82 0.29 142 / 0.6)",
+                          "linear-gradient(90deg, transparent, oklch(0.92 0.18 85), transparent)",
+                        boxShadow: "0 0 8px oklch(0.82 0.16 85 / 0.6)",
                       }}
                     />
                     <CardContent className="p-4 space-y-2">
@@ -1473,9 +1473,9 @@ function AdminPanel({ recipientUsername }: { recipientUsername: string }) {
                         <p
                           className="text-xl font-bold italic leading-tight"
                           style={{
-                            fontFamily: "Fraunces, Georgia, serif",
-                            color: "oklch(0.88 0.28 142)",
-                            textShadow: "0 0 12px oklch(0.82 0.29 142 / 0.35)",
+                            fontFamily: "Cinzel, Georgia, serif",
+                            color: "oklch(0.92 0.18 85)",
+                            textShadow: "0 0 12px oklch(0.82 0.16 85 / 0.35)",
                           }}
                         >
                           {r.imvuUsername}
@@ -1484,7 +1484,7 @@ function AdminPanel({ recipientUsername }: { recipientUsername: string }) {
                       </div>
                       <p
                         className="font-semibold text-sm"
-                        style={{ color: "oklch(0.97 0.005 240)" }}
+                        style={{ color: "oklch(0.95 0.02 85)" }}
                       >
                         {r.eventDetails.title}
                       </p>
@@ -1502,16 +1502,16 @@ function AdminPanel({ recipientUsername }: { recipientUsername: string }) {
         <TabsContent value="settings">
           <Card
             className="glass border max-w-lg"
-            style={{ borderColor: "oklch(0.82 0.29 142 / 0.22)" }}
+            style={{ borderColor: "oklch(0.82 0.16 85 / 0.22)" }}
           >
             <CardHeader className="pb-3">
               <CardTitle
                 className="text-lg flex items-center gap-2"
-                style={{ color: "oklch(0.97 0.005 240)" }}
+                style={{ color: "oklch(0.95 0.02 85)" }}
               >
                 <Settings
                   className="w-5 h-5"
-                  style={{ color: "oklch(0.88 0.28 142)" }}
+                  style={{ color: "oklch(0.92 0.18 85)" }}
                 />
                 Payment Settings
               </CardTitle>
@@ -1605,21 +1605,21 @@ export default function App() {
               exit={{ opacity: 0, scale: 0.95, y: 10 }}
               className="glass border rounded-2xl p-6 w-full max-w-sm mx-4 shadow-2xl"
               style={{
-                borderColor: "oklch(0.82 0.29 142 / 0.3)",
+                borderColor: "oklch(0.82 0.16 85 / 0.3)",
                 boxShadow:
-                  "0 0 40px oklch(0.82 0.29 142 / 0.15), 0 24px 60px oklch(0 0 0 / 0.6)",
+                  "0 0 40px oklch(0.82 0.16 85 / 0.15), 0 24px 60px oklch(0 0 0 / 0.6)",
               }}
             >
               <div className="flex items-center gap-2 mb-4">
                 <ShieldCheck
                   className="w-5 h-5"
-                  style={{ color: "oklch(0.88 0.28 142)" }}
+                  style={{ color: "oklch(0.92 0.18 85)" }}
                 />
                 <h2
                   className="text-xl font-bold italic"
                   style={{
-                    fontFamily: "Fraunces, Georgia, serif",
-                    color: "oklch(0.97 0.005 240)",
+                    fontFamily: "Cinzel, Georgia, serif",
+                    color: "oklch(0.95 0.02 85)",
                   }}
                 >
                   Admin Access
@@ -1644,8 +1644,8 @@ export default function App() {
                   className="flex-1 btn-glow font-bold"
                   style={{
                     background:
-                      "linear-gradient(135deg, oklch(0.85 0.28 142), oklch(0.75 0.26 150))",
-                    color: "oklch(0.06 0.01 240)",
+                      "linear-gradient(135deg, oklch(0.88 0.18 85), oklch(0.72 0.14 65))",
+                    color: "oklch(0.08 0.04 280)",
                   }}
                   onClick={handleAdminCode}
                   data-ocid="admin.confirm_button"
@@ -1684,7 +1684,7 @@ export default function App() {
               alt="Project Clover"
               className="h-16 w-auto object-contain"
               style={{
-                filter: "drop-shadow(0 0 10px oklch(0.82 0.29 142 / 0.4))",
+                filter: "drop-shadow(0 0 10px oklch(0.82 0.16 85 / 0.4))",
               }}
             />
           </button>
@@ -1704,9 +1704,9 @@ export default function App() {
                   view === item.id
                     ? {
                         background:
-                          "linear-gradient(135deg, oklch(0.85 0.28 142), oklch(0.75 0.26 150))",
+                          "linear-gradient(135deg, oklch(0.88 0.18 85), oklch(0.72 0.14 65))",
                         boxShadow:
-                          "0 0 16px oklch(0.82 0.29 142 / 0.5), 0 0 32px oklch(0.82 0.29 142 / 0.2)",
+                          "0 0 16px oklch(0.82 0.16 85 / 0.5), 0 0 32px oklch(0.82 0.16 85 / 0.2)",
                       }
                     : {}
                 }
@@ -1723,7 +1723,7 @@ export default function App() {
         {/* Mobile nav */}
         <div
           className="md:hidden flex"
-          style={{ borderTop: "1px solid oklch(0.82 0.29 142 / 0.12)" }}
+          style={{ borderTop: "1px solid oklch(0.82 0.16 85 / 0.12)" }}
         >
           {navItems.map((item) => (
             <button
@@ -1736,9 +1736,9 @@ export default function App() {
               style={
                 view === item.id
                   ? {
-                      color: "oklch(0.88 0.28 142)",
-                      borderColor: "oklch(0.82 0.29 142)",
-                      textShadow: "0 0 8px oklch(0.82 0.29 142 / 0.5)",
+                      color: "oklch(0.92 0.18 85)",
+                      borderColor: "oklch(0.82 0.16 85)",
+                      textShadow: "0 0 8px oklch(0.82 0.16 85 / 0.5)",
                     }
                   : {}
               }
@@ -1770,7 +1770,7 @@ export default function App() {
                 >
                   <h1
                     className="text-6xl md:text-8xl lg:text-9xl font-bold italic leading-none text-gradient-hero"
-                    style={{ fontFamily: "Fraunces, Georgia, serif" }}
+                    style={{ fontFamily: "Cinzel, Georgia, serif" }}
                   >
                     PROJECT
                     <br />
@@ -1790,8 +1790,8 @@ export default function App() {
                   className="mx-auto mt-6 h-px w-48 md:w-72"
                   style={{
                     background:
-                      "linear-gradient(90deg, transparent, oklch(0.82 0.29 142 / 0.8), transparent)",
-                    boxShadow: "0 0 10px oklch(0.82 0.29 142 / 0.5)",
+                      "linear-gradient(90deg, transparent, oklch(0.82 0.16 85 / 0.8), transparent)",
+                    boxShadow: "0 0 10px oklch(0.82 0.16 85 / 0.5)",
                   }}
                   initial={{ scaleX: 0 }}
                   animate={{ scaleX: 1 }}
@@ -1832,8 +1832,7 @@ export default function App() {
                       delay: 0.2,
                     }}
                     style={{
-                      filter:
-                        "drop-shadow(0 0 20px oklch(0.82 0.29 142 / 0.6))",
+                      filter: "drop-shadow(0 0 20px oklch(0.82 0.16 85 / 0.6))",
                     }}
                   >
                     <CloveSVG size={64} opacity={0.7} />
@@ -1841,15 +1840,15 @@ export default function App() {
                   <p
                     className="text-2xl font-bold italic mb-2"
                     style={{
-                      fontFamily: "Fraunces, Georgia, serif",
-                      color: "oklch(0.97 0.005 240)",
+                      fontFamily: "Cinzel, Georgia, serif",
+                      color: "oklch(0.95 0.02 85)",
                     }}
                   >
                     No parties yet...
                   </p>
                   <p
                     className="text-lg"
-                    style={{ color: "oklch(0.88 0.28 142)" }}
+                    style={{ color: "oklch(0.92 0.18 85)" }}
                   >
                     Check back soon! Something fun is coming 🎉
                   </p>
@@ -1924,7 +1923,7 @@ export default function App() {
       {/* Footer */}
       <footer
         className="py-6 text-center"
-        style={{ borderTop: "1px solid oklch(0.82 0.29 142 / 0.12)" }}
+        style={{ borderTop: "1px solid oklch(0.82 0.16 85 / 0.12)" }}
       >
         <p className="text-muted-foreground text-sm">
           © {new Date().getFullYear()}. Built with ❤️ using{" "}
@@ -1932,7 +1931,7 @@ export default function App() {
             href={`https://caffeine.ai?utm_source=caffeine-footer&utm_medium=referral&utm_content=${encodeURIComponent(window.location.hostname)}`}
             target="_blank"
             rel="noopener noreferrer"
-            style={{ color: "oklch(0.88 0.28 142)" }}
+            style={{ color: "oklch(0.92 0.18 85)" }}
             className="hover:underline"
           >
             caffeine.ai
