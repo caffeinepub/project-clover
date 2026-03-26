@@ -1346,7 +1346,7 @@ export default function App() {
             data-ocid="nav.home.link"
           >
             <img
-              src="/assets/uploads/img_4224-019d22df-d36a-701e-b72a-4a02f87dcacb-1.png"
+              src="/assets/uploads/55f4ba40-2e9e-485c-bea8-fba6aaa00668-019d284b-505a-74a9-85bd-52d46ddac793-1.png"
               alt="Project Clover"
               className="h-14 w-auto object-contain"
             />
