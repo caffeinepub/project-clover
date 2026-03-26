@@ -12,6 +12,7 @@ export function useGetAllEvents() {
       return actor.getAllEvents();
     },
     enabled: !!actor && !isFetching,
+    refetchInterval: 30000, // auto-refresh every 30s so new events appear
   });
 }
 
@@ -36,6 +37,7 @@ export function useGetAllReservations() {
       return actor.getAllReservations();
     },
     enabled: !!actor && !isFetching,
+    refetchInterval: 5000,
   });
 }
 
@@ -45,7 +47,7 @@ export function useGetReservationsByUsername(username: string) {
     queryKey: ["reservationsByUsername", username],
     queryFn: async () => {
       if (!actor || !username) return [];
-      return actor.getReservationsByUsername(username);
+      return actor.getReservationsByUsername(username.trim().toLowerCase());
     },
     enabled: !!actor && !isFetching && username.length > 0,
   });
@@ -65,10 +67,11 @@ export function useSubmitReservation() {
       transactionNote: string;
     }) => {
       const resolvedActor = actor ?? (await createActorWithConfig());
+      // Normalize username: trim whitespace and lowercase for consistent lookup
       return resolvedActor.submitReservation(
         eventId,
-        imvuUsername,
-        transactionNote,
+        imvuUsername.trim().toLowerCase(),
+        transactionNote.trim(),
       );
     },
     onSuccess: () => {
@@ -96,8 +99,26 @@ export function useAddEvent() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (input: EventInput) => {
-      const resolvedActor = actor ?? (await createActorWithConfig());
-      return resolvedActor.addEvent(input);
+      const maxRetries = 3;
+      let lastError: unknown;
+      for (let attempt = 0; attempt < maxRetries; attempt++) {
+        try {
+          const resolvedActor = actor ?? (await createActorWithConfig());
+          return await resolvedActor.addEvent(input);
+        } catch (err) {
+          lastError = err;
+          const msg = err instanceof Error ? err.message : String(err);
+          if (
+            (msg.includes("stopped") || msg.includes("IC0508")) &&
+            attempt < maxRetries - 1
+          ) {
+            await new Promise((resolve) => setTimeout(resolve, 2000));
+          } else {
+            throw err;
+          }
+        }
+      }
+      throw lastError;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["getAllEvents"] });

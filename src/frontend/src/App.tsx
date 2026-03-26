@@ -496,7 +496,9 @@ function LookupView() {
     if (!actor || !searchInput.trim()) return;
     setSearching(true);
     try {
-      const res = await actor.getReservationsByUsername(searchInput.trim());
+      const res = await actor.getReservationsByUsername(
+        searchInput.trim().toLowerCase(),
+      );
       setResults(res);
     } catch {
       toast.error("Failed to fetch reservations");
@@ -641,7 +643,13 @@ function ManageEventsTab() {
       setPrice("");
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
-      toast.error(`Upload failed: ${message}`);
+      if (message.includes("stopped") || message.includes("IC0508")) {
+        toast.error(
+          "Upload failed: server is restarting, please try again in a moment.",
+        );
+      } else {
+        toast.error(`Upload failed: ${message}`);
+      }
     }
   };
 
@@ -883,6 +891,12 @@ function AdminPanel({
   const { mutateAsync: updateRes } = useUpdateReservation();
   const [updating, setUpdating] = useState<string | null>(null);
 
+  const _approvedReservations =
+    reservations?.filter((r) => r.status === ReservationStatus.approved) ?? [];
+
+  const allReservationsSorted = [...(reservations ?? [])].sort((a, b) =>
+    Number(b.id - a.id),
+  );
   const handleUpdate = async (id: bigint, status: ReservationStatus) => {
     const key = `${id}-${status}`;
     setUpdating(key);
@@ -921,6 +935,13 @@ function AdminPanel({
             data-ocid="admin.reservations.tab"
           >
             Reservations
+          </TabsTrigger>
+          <TabsTrigger
+            value="ticket-holders"
+            className="data-[state=active]:bg-primary/20 data-[state=active]:text-primary"
+            data-ocid="admin.ticket_holders.tab"
+          >
+            Ticket Holders
           </TabsTrigger>
           <TabsTrigger
             value="settings"
@@ -1052,6 +1073,98 @@ function AdminPanel({
                   ))}
                 </TableBody>
               </Table>
+            </div>
+          )}
+        </TabsContent>
+
+        <TabsContent value="ticket-holders">
+          <div className="flex items-center gap-3 mb-6">
+            <h3 className="text-xl font-bold text-foreground">
+              Ticket Holders
+            </h3>
+            <Badge className="bg-primary/20 text-primary border border-primary/50 text-sm px-3 py-1">
+              {allReservationsSorted.length}
+            </Badge>
+          </div>
+
+          {isLoading && (
+            <div
+              className="grid grid-cols-1 md:grid-cols-2 gap-4"
+              data-ocid="admin.ticket_holders.loading_state"
+            >
+              {[1, 2, 3, 4].map((i) => (
+                <Skeleton key={i} className="h-32 w-full bg-card" />
+              ))}
+            </div>
+          )}
+
+          {!isLoading && allReservationsSorted.length === 0 && (
+            <div
+              className="text-center py-16 text-muted-foreground border border-dashed border-border rounded-xl"
+              data-ocid="admin.ticket_holders.empty_state"
+            >
+              <div className="text-4xl mb-3">🍀</div>
+              <p className="font-medium">No tickets submitted yet</p>
+              <p className="text-sm mt-1 opacity-60">
+                Ticket holders will appear here as soon as someone reserves
+              </p>
+            </div>
+          )}
+
+          {!isLoading && allReservationsSorted.length > 0 && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {allReservationsSorted.map((r, i) => (
+                <motion.div
+                  key={r.id.toString()}
+                  initial={{ opacity: 0, y: 12 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: i * 0.05 }}
+                  data-ocid={`admin.ticket_holders.item.${i + 1}`}
+                >
+                  <Card
+                    className="bg-card border border-primary/30 overflow-hidden"
+                    style={{
+                      background: "oklch(0.11 0.018 142)",
+                      boxShadow: "0 0 0 1px oklch(0.79 0.21 142 / 0.2)",
+                    }}
+                  >
+                    {/* Green top accent bar */}
+                    <div
+                      className="h-1 w-full"
+                      style={{ background: "oklch(0.79 0.21 142 / 0.7)" }}
+                    />
+                    <CardContent className="p-4 space-y-2">
+                      <div className="flex items-start justify-between gap-2">
+                        <p
+                          className="text-xl font-bold leading-tight"
+                          style={{ color: "oklch(0.79 0.21 142)" }}
+                        >
+                          {r.imvuUsername}
+                        </p>
+                        {r.status === ReservationStatus.approved ? (
+                          <Badge className="shrink-0 bg-primary/20 text-primary border border-primary/50 text-xs">
+                            ✓ Confirmed
+                          </Badge>
+                        ) : r.status === ReservationStatus.rejected ? (
+                          <Badge className="shrink-0 bg-red-500/20 text-red-400 border border-red-500/50 text-xs">
+                            Rejected
+                          </Badge>
+                        ) : (
+                          <Badge className="shrink-0 bg-amber-500/20 text-amber-400 border border-amber-500/50 text-xs">
+                            Pending
+                          </Badge>
+                        )}
+                      </div>
+                      <p className="font-semibold text-foreground text-sm">
+                        {r.eventDetails.title}
+                      </p>
+                      <p className="text-xs text-muted-foreground font-mono">
+                        {r.transactionNote}
+                      </p>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
             </div>
           )}
         </TabsContent>

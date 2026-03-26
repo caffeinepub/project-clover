@@ -60,6 +60,13 @@ function Sparkle({ x, y, delay }: { x: string; y: string; delay: number }) {
 export function SplashScreen({ onDone }: { onDone: () => void }) {
   const [exiting, setExiting] = useState(false);
 
+  const dismiss = () => {
+    if (!exiting) {
+      setExiting(true);
+      setTimeout(onDone, 600);
+    }
+  };
+
   useEffect(() => {
     const exitTimer = setTimeout(() => setExiting(true), 2600);
     const doneTimer = setTimeout(onDone, 3200);
@@ -71,10 +78,11 @@ export function SplashScreen({ onDone }: { onDone: () => void }) {
 
   return (
     <motion.div
-      className="fixed inset-0 z-[100] flex flex-col items-center justify-center overflow-hidden"
+      className="fixed inset-0 z-[100] flex flex-col items-center justify-center overflow-hidden cursor-pointer select-none"
       style={{ background: "oklch(0.08 0.02 142)" }}
       animate={exiting ? { opacity: 0, scale: 1.05 } : { opacity: 1, scale: 1 }}
       transition={{ duration: 0.6, ease: "easeInOut" }}
+      onClick={dismiss}
     >
       {/* Background glow */}
       <motion.div
@@ -170,6 +178,17 @@ export function SplashScreen({ onDone }: { onDone: () => void }) {
         transition={{ delay: 1.1, duration: 0.6 }}
       >
         🍀 Project Clover 🍀
+      </motion.p>
+
+      {/* Tap to skip hint */}
+      <motion.p
+        className="absolute bottom-10 text-xs uppercase tracking-widest"
+        style={{ color: "oklch(0.45 0.1 142)" }}
+        initial={{ opacity: 0 }}
+        animate={{ opacity: [0, 0.7, 0.5] }}
+        transition={{ delay: 1.4, duration: 0.8 }}
+      >
+        Tap to skip
       </motion.p>
 
       {/* Bottom shimmer bar */}
