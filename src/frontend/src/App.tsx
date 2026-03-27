@@ -462,7 +462,7 @@ function TicketPopup({
           animate={{ opacity: 1, y: 0 }}
           transition={{ delay: 0.2 }}
         >
-          {["🎉a", "🍀b", "🎉c"].map((em, i) => (
+          {["🎉", "🍀", "🎉"].map((em, i) => (
             <motion.span
               key={em}
               className="text-2xl"
@@ -487,7 +487,7 @@ function TicketPopup({
           >
             YOUR TICKET
           </span>
-          {["🎉d", "🍀e", "🎉f"].map((em, i) => (
+          {["🎉", "🍀", "🎉"].map((em, i) => (
             <motion.span
               key={em}
               className="text-2xl"
@@ -765,13 +765,11 @@ function ReservationModal({
   recipientUsername,
   open,
   onClose,
-  onSuccess,
 }: {
   event: Event | null;
   recipientUsername: string;
   open: boolean;
   onClose: () => void;
-  onSuccess: () => void;
 }) {
   const [imvuUsername, setImvuUsername] = useState("");
   const [transactionNote, setTransactionNote] = useState("");
@@ -977,7 +975,7 @@ function ReservationModal({
             imvuUsername={submittedUsername}
             onDismiss={() => {
               setTicketPopupOpen(false);
-              onSuccess();
+              onClose();
             }}
           />
         )}
@@ -996,25 +994,23 @@ function ConfirmationBanner({ onBack }: { onBack: () => void }) {
       className="relative text-center max-w-lg mx-auto py-16 px-4 overflow-visible"
       data-ocid="reserve.success_state"
     >
-      {["🎉a", "✨b", "🍀c", "🎊d", "💚e", "✨f", "🍀g", "🎉h"].map(
-        (emoji, i) => (
-          <motion.span
-            key={emoji}
-            className="absolute text-2xl pointer-events-none select-none"
-            style={{ left: `${8 + i * 12}%`, top: "28%" }}
-            initial={{ y: 0, opacity: 1, scale: 1 }}
-            animate={{
-              y: -150,
-              opacity: 0,
-              scale: 0.5,
-              rotate: i % 2 === 0 ? 180 : -180,
-            }}
-            transition={{ delay: i * 0.12, duration: 1.4, ease: "easeOut" }}
-          >
-            {emoji}
-          </motion.span>
-        ),
-      )}
+      {["🎉", "✨", "🍀", "🎊", "💚", "✨", "🍀", "🎉"].map((emoji, i) => (
+        <motion.span
+          key={emoji}
+          className="absolute text-2xl pointer-events-none select-none"
+          style={{ left: `${8 + i * 12}%`, top: "28%" }}
+          initial={{ y: 0, opacity: 1, scale: 1 }}
+          animate={{
+            y: -150,
+            opacity: 0,
+            scale: 0.5,
+            rotate: i % 2 === 0 ? 180 : -180,
+          }}
+          transition={{ delay: i * 0.12, duration: 1.4, ease: "easeOut" }}
+        >
+          {emoji}
+        </motion.span>
+      ))}
 
       <motion.div
         className="text-8xl mb-6 select-none inline-block"
@@ -1949,11 +1945,6 @@ export default function App() {
     setReserveOpen(true);
   };
 
-  const handleReserveSuccess = () => {
-    setReserveOpen(false);
-    setShowConfirm(true);
-  };
-
   const handleAdminNavClick = () => {
     if (adminUnlocked) {
       setView("admin");
@@ -1994,7 +1985,6 @@ export default function App() {
         recipientUsername={reserveEvent?.recipientUsername || recipientUsername}
         open={reserveOpen}
         onClose={() => setReserveOpen(false)}
-        onSuccess={handleReserveSuccess}
       />
 
       {/* Admin Code Modal */}
