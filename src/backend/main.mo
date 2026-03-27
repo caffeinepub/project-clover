@@ -93,17 +93,14 @@ actor {
     };
   };
 
-  var events = Map.empty<Nat, Event>();
-  var nextEventId = 0;
-
-  // Separate stable map for per-event recipient usernames (avoids schema migration)
-  var eventRecipients = Map.empty<Nat, Text>();
-
-  var reservations = Map.empty<Nat, Reservation>();
-  var nextReservationId = 0;
-  var recipientUsername = "Iluvlean";
-
-  var userProfiles = Map.empty<Principal, UserProfile>();
+  // STABLE variables — data persists across canister upgrades and restarts
+  stable var events = Map.empty<Nat, Event>();
+  stable var nextEventId = 0;
+  stable var eventRecipients = Map.empty<Nat, Text>();
+  stable var reservations = Map.empty<Nat, Reservation>();
+  stable var nextReservationId = 0;
+  stable var recipientUsername = "Iluvlean";
+  stable var userProfiles = Map.empty<Principal, UserProfile>();
 
   let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
