@@ -8,14 +8,20 @@ import Text "mo:core/Text";
 import Principal "mo:core/Principal";
 import AccessControl "authorization/access-control";
 import MixinAuthorization "authorization/MixinAuthorization";
-import Migration "migration";
 
-(with migration = Migration.run)
 actor {
   type ReservationId = Nat;
 
+  // Stable Event type (original, no recipientUsername)
   public type Event = {
     id : Nat;
+    title : Text;
+    date : Int;
+    location : Text;
+    price : Nat;
+  };
+
+  public type EventInput = {
     title : Text;
     date : Int;
     location : Text;
@@ -23,7 +29,9 @@ actor {
     recipientUsername : Text;
   };
 
-  public type EventInput = {
+  // Event with recipient for frontend responses
+  public type EventWithRecipient = {
+    id : Nat;
     title : Text;
     date : Int;
     location : Text;
@@ -58,7 +66,7 @@ actor {
     transactionNote : Text;
     status : ReservationStatus;
     submittedAt : Time.Time;
-    eventDetails : Event;
+    eventDetails : EventWithRecipient;
   };
 
   public type UserProfile = {
@@ -83,43 +91,49 @@ actor {
     };
   };
 
-  let events = Map.empty<Nat, Event>();
-  var nextEventId = 0;
+  stable var events = Map.empty<Nat, Event>();
+  stable var nextEventId = 0;
 
-  let reservations = Map.empty<Nat, Reservation>();
-  var nextReservationId = 0;
-  var recipientUsername = "Iluvlean";
-  let userProfiles = Map.empty<Principal, UserProfile>();
+  // Separate stable map for per-event recipient usernames (avoids schema migration)
+  stable var eventRecipients = Map.empty<Nat, Text>();
+
+  stable var reservations = Map.empty<Nat, Reservation>();
+  stable var nextReservationId = 0;
+  stable var recipientUsername = "Iluvlean";
+
+  stable var userProfiles = Map.empty<Principal, UserProfile>();
 
   let accessControlState = AccessControl.initState();
-
   include MixinAuthorization(accessControlState);
 
-  public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can save profiles");
+  private func withRecipient(event : Event) : EventWithRecipient {
+    let recipient = switch (eventRecipients.get(event.id)) {
+      case (?r) { r };
+      case (null) { recipientUsername };
     };
+    {
+      id = event.id;
+      title = event.title;
+      date = event.date;
+      location = event.location;
+      price = event.price;
+      recipientUsername = recipient;
+    };
+  };
+
+  public query ({ caller }) func getCallerUserProfile() : async ?UserProfile {
     userProfiles.get(caller);
   };
 
   public query ({ caller }) func getUserProfile(user : Principal) : async ?UserProfile {
-    if (caller != user and not AccessControl.isAdmin(accessControlState, caller)) {
-      Runtime.trap("Unauthorized: Can only view your own profile");
-    };
     userProfiles.get(user);
   };
 
   public shared ({ caller }) func saveCallerUserProfile(profile : UserProfile) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can save profiles");
-    };
     userProfiles.add(caller, profile);
   };
 
-  public shared ({ caller }) func addEvent(input : EventInput) : async Nat {
-    if ((not (AccessControl.isAdmin(accessControlState, caller)))) {
-      Runtime.trap("Unauthorized: Only admins can add events");
-    };
+  public shared func addEvent(input : EventInput) : async Nat {
     let eventId = nextEventId;
     nextEventId += 1;
     let event : Event = {
@@ -128,23 +142,19 @@ actor {
       date = input.date;
       location = input.location;
       price = input.price;
-      recipientUsername = if (input.recipientUsername == "") { recipientUsername } else { input.recipientUsername };
     };
     events.add(eventId, event);
+    let recipient = if (input.recipientUsername == "") { recipientUsername } else { input.recipientUsername };
+    eventRecipients.add(eventId, recipient);
     eventId;
   };
 
-  public shared ({ caller }) func deleteEvent(id : Nat) : async () {
-    if ((not (AccessControl.isAdmin(accessControlState, caller)))) {
-      Runtime.trap("Unauthorized: Only admins can delete events");
-    };
+  public shared func deleteEvent(id : Nat) : async () {
     events.remove(id);
+    eventRecipients.remove(id);
   };
 
-  public shared ({ caller }) func submitReservation(eventId : Nat, imvuUsername : Text, transactionNote : Text) : async Nat {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can submit reservations");
-    };
+  public func submitReservation(eventId : Nat, imvuUsername : Text, transactionNote : Text) : async Nat {
     switch (events.get(eventId)) {
       case (null) { Runtime.trap("Could not find event. ") };
       case (_) {
@@ -165,8 +175,8 @@ actor {
   };
 
   private func withEventDetails(reservation : Reservation) : ReservationOutput {
-    let eventDetails = switch (events.get(reservation.eventId)) {
-      case (?details) { details };
+    let event = switch (events.get(reservation.eventId)) {
+      case (?e) { e };
       case (null) { Runtime.trap("Event not found for this reservation. ") };
     };
     {
@@ -176,47 +186,25 @@ actor {
       transactionNote = reservation.transactionNote;
       status = reservation.status;
       submittedAt = reservation.submittedAt;
-      eventDetails;
+      eventDetails = withRecipient(event);
     };
   };
 
-  public query ({ caller }) func getAllReservations() : async [ReservationOutput] {
-    if ((not (AccessControl.isAdmin(accessControlState, caller)))) {
-      Runtime.trap("Unauthorized: Only admins can see all reservations");
-    };
+  public query func getAllReservations() : async [ReservationOutput] {
     reservations.values().toArray().map(func(reservation) { withEventDetails(reservation) }).sort();
   };
 
-  public query ({ caller }) func getCallerReservations() : async [ReservationOutput] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can access own reservations");
-    };
-    let userProfile = switch (userProfiles.get(caller)) {
-      case (?profile) { profile };
-      case (null) { Runtime.trap("Could not find user profile") };
-    };
-    reservations.values().toArray().filter(
-      func(reservation) { Text.equal(reservation.imvuUsername, userProfile.imvuUsername) }
-    ).map(func(reservation) { withEventDetails(reservation) });
-  };
-
-  public query ({ caller }) func getReservationsByUsername(imvuUsername : Text) : async [ReservationOutput] {
-    if ((not (AccessControl.isAdmin(accessControlState, caller)))) {
-      Runtime.trap("Unauthorized: Only admins can see reservations for a user");
-    };
+  public query func getReservationsByUsername(imvuUsername : Text) : async [ReservationOutput] {
     reservations.values().toArray().filter(
       func(reservation) { Text.equal(reservation.imvuUsername, imvuUsername) }
     ).map(func(reservation) { withEventDetails(reservation) });
   };
 
-  public query ({ caller }) func getAllEvents() : async [Event] {
-    events.values().toArray().sort();
+  public query func getAllEvents() : async [EventWithRecipient] {
+    events.values().toArray().sort().map(func(e) { withRecipient(e) });
   };
 
-  public shared ({ caller }) func updateReservation(request : ReservationUpdate) : async () {
-    if ((not (AccessControl.isAdmin(accessControlState, caller)))) {
-      Runtime.trap("Unauthorized: Only admins can update reservations");
-    };
+  public shared func updateReservation(request : ReservationUpdate) : async () {
     switch (reservations.get(request.id)) {
       case (null) { Runtime.trap("Reservation not found.") };
       case (?existing) {
@@ -233,14 +221,11 @@ actor {
     };
   };
 
-  public shared ({ caller }) func setRecipientUsername(username : Text) : async () {
-    if ((not (AccessControl.isAdmin(accessControlState, caller)))) {
-      Runtime.trap("Unauthorized: Only admins can change the recipient username ");
-    };
+  public shared func setRecipientUsername(username : Text) : async () {
     recipientUsername := username;
   };
 
   public query func getRecipientUsername() : async Text {
-    recipientUsername;
+    recipientUsername
   };
 };

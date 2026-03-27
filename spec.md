@@ -1,26 +1,26 @@
 # Project Clover
 
 ## Current State
-Each event shares a single global `recipientUsername` stored in the backend. The upload form has a "Send Credits To" field that updates this global value. The reservation modal reads the global recipient and displays it in payment instructions.
+Each event stores: id, title, date, location, price. There is a single global `recipientUsername` in the backend. The Upload Event form has a "Send Credits To" field that updates this global value. All events show the same recipient.
 
 ## Requested Changes (Diff)
 
 ### Add
-- `recipientUsername: Text` field to `Event` and `EventInput` types in the backend
-- Backend `addEvent` stores the per-event recipient in the event record
+- `recipientUsername` field to the `Event` and `EventInput` types in the backend
+- Per-event recipient stored and returned with each event
 
 ### Modify
-- Upload form: "Send Credits To" now saves to the event record instead of the global setting
-- `ReservationModal`: reads `event.recipientUsername` instead of the global `recipientUsername` prop
-- `EventCard` and ticket display: show the per-event recipient where relevant
-- Remove `setRecipientUsername` call from the upload handler (or keep global as fallback)
+- `addEvent` to accept and store `recipientUsername` per event
+- `getAllEvents` to return `recipientUsername` per event
+- Upload Event form: "Send Credits To" field saves per-event (not global)
+- Reservation modal: show the specific event's `recipientUsername` (not global)
 
 ### Remove
-- Passing global `recipientUsername` prop into `ReservationModal` (replaced by per-event value)
+- Dependency on global `recipientUsername` for per-event payment instructions (keep global as fallback default in the form)
 
 ## Implementation Plan
-1. Update `main.mo`: add `recipientUsername` to `Event` and `EventInput`, store it in `addEvent`
-2. Regenerate backend bindings
-3. Update frontend upload form to pass `recipientUsername` in `EventInput`
-4. Update `ReservationModal` to use `event.recipientUsername` directly
-5. Keep global recipient for backwards compatibility (existing events without the field fall back to global)
+1. Update `Event` and `EventInput` types in `main.mo` to include `recipientUsername: Text`
+2. Update `addEvent` to store `recipientUsername` from input
+3. Update `backend.d.ts` to reflect new Event/EventInput shapes
+4. Update frontend Upload Event form to pass `recipientUsername` when creating an event
+5. Update reservation modal to read `event.recipientUsername` instead of fetching global

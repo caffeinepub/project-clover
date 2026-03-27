@@ -421,11 +421,13 @@ function EventCard({
 // ── Reservation Modal ─────────────────────────────────────────────────────────
 function ReservationModal({
   event,
+  recipientUsername,
   open,
   onClose,
   onSuccess,
 }: {
   event: Event | null;
+  recipientUsername: string;
   open: boolean;
   onClose: () => void;
   onSuccess: () => void;
@@ -537,7 +539,7 @@ function ReservationModal({
               className="font-bold"
               style={{ color: "oklch(0.92 0.32 145)" }}
             >
-              {event?.recipientUsername}
+              {recipientUsername}
             </span>
           </p>
           <p className="text-sm text-foreground">
@@ -897,7 +899,7 @@ function ManageEventsTab() {
           date: BigInt(dateMs) * 1_000_000n,
           location,
           price: priceBigInt,
-          recipientUsername: sendCreditsTo || "Iluvlean",
+          recipientUsername: sendCreditsTo || fetchedRecipient || "Iluvlean",
         },
         onRetry: (attempt, total) => {
           toast.loading(`Server restarting — retrying ${attempt}/${total}...`, {
@@ -1620,6 +1622,7 @@ export default function App() {
       {/* Reservation Modal */}
       <ReservationModal
         event={reserveEvent}
+        recipientUsername={reserveEvent?.recipientUsername || recipientUsername}
         open={reserveOpen}
         onClose={() => setReserveOpen(false)}
         onSuccess={handleReserveSuccess}
