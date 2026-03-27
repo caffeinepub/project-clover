@@ -765,16 +765,16 @@ function ReservationModal({
   recipientUsername,
   open,
   onClose,
+  onTicketReserved,
 }: {
   event: Event | null;
   recipientUsername: string;
   open: boolean;
   onClose: () => void;
+  onTicketReserved: (username: string) => void;
 }) {
   const [imvuUsername, setImvuUsername] = useState("");
   const [transactionNote, setTransactionNote] = useState("");
-  const [ticketPopupOpen, setTicketPopupOpen] = useState(false);
-  const [submittedUsername, setSubmittedUsername] = useState("");
   const { mutateAsync: submitReservation, isPending } = useSubmitReservation();
 
   const handleSubmit = async () => {
@@ -789,10 +789,10 @@ function ReservationModal({
         imvuUsername: imvuUsername.trim().toLowerCase(),
         transactionNote: transactionNote.trim(),
       });
-      setSubmittedUsername(imvuUsername.trim().toLowerCase());
+      const username = imvuUsername.trim().toLowerCase();
       setImvuUsername("");
       setTransactionNote("");
-      setTicketPopupOpen(true);
+      onTicketReserved(username);
     } catch {
       toast.error("Failed to submit reservation");
     }
@@ -966,20 +966,6 @@ function ReservationModal({
           </div>
         </DialogContent>
       </Dialog>
-
-      {/* Ticket popup shown after successful reservation */}
-      <AnimatePresence>
-        {ticketPopupOpen && event && (
-          <TicketPopup
-            event={event}
-            imvuUsername={submittedUsername}
-            onDismiss={() => {
-              setTicketPopupOpen(false);
-              onClose();
-            }}
-          />
-        )}
-      </AnimatePresence>
     </>
   );
 }
@@ -1932,6 +1918,10 @@ export default function App() {
   const [view, setView] = useState<View>("events");
   const [reserveEvent, setReserveEvent] = useState<Event | null>(null);
   const [reserveOpen, setReserveOpen] = useState(false);
+  const [ticketPopupData, setTicketPopupData] = useState<{
+    event: Event;
+    username: string;
+  } | null>(null);
   const [showConfirm, setShowConfirm] = useState(false);
   const [adminUnlocked, setAdminUnlocked] = useState(false);
   const [adminCodeInput, setAdminCodeInput] = useState("");
@@ -1985,7 +1975,23 @@ export default function App() {
         recipientUsername={reserveEvent?.recipientUsername || recipientUsername}
         open={reserveOpen}
         onClose={() => setReserveOpen(false)}
+        onTicketReserved={(username) => {
+          if (reserveEvent)
+            setTicketPopupData({ event: reserveEvent, username });
+        }}
       />
+      <AnimatePresence>
+        {ticketPopupData && (
+          <TicketPopup
+            event={ticketPopupData.event}
+            imvuUsername={ticketPopupData.username}
+            onDismiss={() => {
+              setTicketPopupData(null);
+              setReserveOpen(false);
+            }}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Admin Code Modal */}
       <AnimatePresence>
