@@ -36,7 +36,8 @@ import {
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
-import type { Event, ReservationOutput } from "./backend";
+import type { EventWithRecipient, ReservationOutput } from "./backend";
+type Event = EventWithRecipient;
 import { ReservationStatus } from "./backend";
 import { SplashScreen } from "./components/SplashScreen";
 import { useActor } from "./hooks/useActor";
@@ -183,7 +184,8 @@ function StatusBadge({ status }: { status: ReservationStatus }) {
 function EventCard({
   event,
   onReserve,
-}: { event: Event; onReserve: (e: Event) => void }) {
+  reservationCount = 0,
+}: { event: Event; onReserve: (e: Event) => void; reservationCount?: number }) {
   const { date, time } = formatDateShort(event.date);
   return (
     <motion.div
@@ -406,6 +408,13 @@ function EventCard({
           ))}
         </div>
 
+        {/* Reserved count */}
+        <span
+          className="text-[8px] font-semibold text-center leading-tight"
+          style={{ color: "oklch(0.85 0.28 145 / 0.75)" }}
+        >
+          🎟 {reservationCount}
+        </span>
         {/* Admit One */}
         <span
           className="text-[8px] font-bold uppercase tracking-widest"
@@ -1266,11 +1275,17 @@ function ManageEventsTab() {
       setDateTime("");
       setLocation("");
       setPrice("");
-    } catch {
+    } catch (err: unknown) {
       toast.dismiss(retryToastId);
-      toast.error(
-        "Upload failed after multiple attempts. Please wait a minute and try again.",
-      );
+      const msg = err instanceof Error ? err.message : String(err);
+      if (
+        msg.toLowerCase().includes("stopped") ||
+        msg.toLowerCase().includes("restart")
+      ) {
+        toast.error("Server restarting — please wait 1 minute and try again.");
+      } else {
+        toast.error(`Upload failed: ${msg}`);
+      }
     } finally {
       setAdding(false);
     }
@@ -1384,7 +1399,7 @@ function ManageEventsTab() {
             className="text-xs font-bold mb-1 block uppercase tracking-wider"
             style={{ color: "oklch(0.92 0.32 145)" }}
           >
-            Send Credits To
+            Send Credits To (IMVU Username)
           </label>
           <Input
             id="send-credits-to"
@@ -1927,6 +1942,7 @@ export default function App() {
   const [showAdminPrompt, setShowAdminPrompt] = useState(false);
   const { data: recipientUsername = "Iluvlean" } = useGetRecipientUsername();
   const { data: events, isLoading: eventsLoading } = useGetAllEvents();
+  const { data: allReservations = [] } = useGetAllReservations();
 
   const handleReserve = (event: Event) => {
     setReserveEvent(event);
@@ -2331,7 +2347,14 @@ export default function App() {
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ delay: i * 0.08 }}
                     >
-                      <EventCard event={event} onReserve={handleReserve} />
+                      <EventCard
+                        event={event}
+                        onReserve={handleReserve}
+                        reservationCount={
+                          allReservations.filter((r) => r.eventId === event.id)
+                            .length
+                        }
+                      />
                     </motion.div>
                   ))}
                 </div>

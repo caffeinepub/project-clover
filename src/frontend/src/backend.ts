@@ -90,24 +90,24 @@ export class ExternalBlob {
     }
 }
 export type Time = bigint;
-export interface EventInput {
-    title: string;
-    date: bigint;
-    price: bigint;
-    location: string;
-    recipientUsername: string;
-}
 export interface ReservationUpdate {
     id: bigint;
     status: ReservationStatus;
 }
-export interface Event {
+export interface EventWithRecipient {
     id: bigint;
     title: string;
     date: bigint;
     price: bigint;
-    location: string;
     recipientUsername: string;
+    location: string;
+}
+export interface EventInput {
+    title: string;
+    date: bigint;
+    price: bigint;
+    recipientUsername: string;
+    location: string;
 }
 export interface UserProfile {
     name: string;
@@ -118,7 +118,7 @@ export interface ReservationOutput {
     status: ReservationStatus;
     eventId: bigint;
     transactionNote: string;
-    eventDetails: Event;
+    eventDetails: EventWithRecipient;
     submittedAt: Time;
     imvuUsername: string;
 }
@@ -137,22 +137,21 @@ export interface backendInterface {
     addEvent(input: EventInput): Promise<bigint>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     deleteEvent(id: bigint): Promise<void>;
-    getAllEvents(): Promise<Array<Event>>;
+    getAllEvents(): Promise<Array<EventWithRecipient>>;
     getAllReservations(): Promise<Array<ReservationOutput>>;
     getAllReservationsForEvent(eventId: bigint): Promise<Array<ReservationOutput>>;
     getCallerUserProfile(): Promise<UserProfile | null>;
     getCallerUserRole(): Promise<UserRole>;
-    getReservation(id: bigint): Promise<ReservationOutput>;
+    getRecipientUsername(): Promise<string>;
     getReservationsByUsername(imvuUsername: string): Promise<Array<ReservationOutput>>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
+    setRecipientUsername(username: string): Promise<void>;
     submitReservation(eventId: bigint, imvuUsername: string, transactionNote: string): Promise<bigint>;
     updateReservation(request: ReservationUpdate): Promise<void>;
-    setRecipientUsername(username: string): Promise<void>;
-    getRecipientUsername(): Promise<string>;
 }
-import type { Event as _Event, ReservationOutput as _ReservationOutput, ReservationStatus as _ReservationStatus, ReservationUpdate as _ReservationUpdate, Time as _Time, UserProfile as _UserProfile, UserRole as _UserRole } from "./declarations/backend.did.d.ts";
+import type { EventWithRecipient as _EventWithRecipient, ReservationOutput as _ReservationOutput, ReservationStatus as _ReservationStatus, ReservationUpdate as _ReservationUpdate, Time as _Time, UserProfile as _UserProfile, UserRole as _UserRole } from "./declarations/backend.did.d.ts";
 export class Backend implements backendInterface {
     constructor(private actor: ActorSubclass<_SERVICE>, private _uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, private _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, private processError?: (error: unknown) => never){}
     async _initializeAccessControlWithSecret(arg0: string): Promise<void> {
@@ -211,7 +210,7 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async getAllEvents(): Promise<Array<Event>> {
+    async getAllEvents(): Promise<Array<EventWithRecipient>> {
         if (this.processError) {
             try {
                 const result = await this.actor.getAllEvents();
@@ -239,17 +238,17 @@ export class Backend implements backendInterface {
             return from_candid_vec_n3(this._uploadFile, this._downloadFile, result);
         }
     }
-    async getAllReservationsForEvent(arg0: bigint): Promise<Array<ReservationOutput>> {
+    async getAllReservationsForEvent(eventId: bigint): Promise<Array<ReservationOutput>> {
         if (this.processError) {
             try {
-                const result = await this.actor.getAllReservationsForEvent(arg0);
+                const result = await this.actor.getAllReservationsForEvent(eventId);
                 return from_candid_vec_n3(this._uploadFile, this._downloadFile, result);
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.getAllReservationsForEvent(arg0);
+            const result = await this.actor.getAllReservationsForEvent(eventId);
             return from_candid_vec_n3(this._uploadFile, this._downloadFile, result);
         }
     }
@@ -281,18 +280,18 @@ export class Backend implements backendInterface {
             return from_candid_UserRole_n9(this._uploadFile, this._downloadFile, result);
         }
     }
-    async getReservation(arg0: bigint): Promise<ReservationOutput> {
+    async getRecipientUsername(): Promise<string> {
         if (this.processError) {
             try {
-                const result = await this.actor.getReservation(arg0);
-                return from_candid_ReservationOutput_n4(this._uploadFile, this._downloadFile, result);
+                const result = await this.actor.getRecipientUsername();
+                return result;
             } catch (e) {
                 this.processError(e);
                 throw new Error("unreachable");
             }
         } else {
-            const result = await this.actor.getReservation(arg0);
-            return from_candid_ReservationOutput_n4(this._uploadFile, this._downloadFile, result);
+            const result = await this.actor.getRecipientUsername();
+            return result;
         }
     }
     async getReservationsByUsername(arg0: string): Promise<Array<ReservationOutput>> {
@@ -351,6 +350,20 @@ export class Backend implements backendInterface {
             return result;
         }
     }
+    async setRecipientUsername(arg0: string): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.setRecipientUsername(arg0);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.setRecipientUsername(arg0);
+            return result;
+        }
+    }
     async submitReservation(arg0: bigint, arg1: string, arg2: string): Promise<bigint> {
         if (this.processError) {
             try {
@@ -379,20 +392,6 @@ export class Backend implements backendInterface {
             return result;
         }
     }
-    async setRecipientUsername(username: string): Promise<void> {
-        if (this.processError) {
-            try { return await this.actor.setRecipientUsername(username); }
-            catch (e) { this.processError(e); }
-        }
-        return this.actor.setRecipientUsername(username);
-    }
-    async getRecipientUsername(): Promise<string> {
-        if (this.processError) {
-            try { return await this.actor.getRecipientUsername(); }
-            catch (e) { this.processError(e); }
-        }
-        return this.actor.getRecipientUsername();
-    }
 }
 function from_candid_ReservationOutput_n4(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: _ReservationOutput): ReservationOutput {
     return from_candid_record_n5(_uploadFile, _downloadFile, value);
@@ -411,7 +410,7 @@ function from_candid_record_n5(_uploadFile: (file: ExternalBlob) => Promise<Uint
     status: _ReservationStatus;
     eventId: bigint;
     transactionNote: string;
-    eventDetails: _Event;
+    eventDetails: _EventWithRecipient;
     submittedAt: _Time;
     imvuUsername: string;
 }): {
@@ -419,7 +418,7 @@ function from_candid_record_n5(_uploadFile: (file: ExternalBlob) => Promise<Uint
     status: ReservationStatus;
     eventId: bigint;
     transactionNote: string;
-    eventDetails: Event;
+    eventDetails: EventWithRecipient;
     submittedAt: Time;
     imvuUsername: string;
 } {
@@ -511,7 +510,6 @@ export interface CreateActorOptions {
     actorOptions?: ActorConfig;
     processError?: (error: unknown) => never;
 }
-
 export function createActor(canisterId: string, _uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, options: CreateActorOptions = {}): Backend {
     const agent = options.agent || HttpAgent.createSync({
         ...options.agentOptions

@@ -8,7 +8,9 @@ import Text "mo:core/Text";
 import Principal "mo:core/Principal";
 import AccessControl "authorization/access-control";
 import MixinAuthorization "authorization/MixinAuthorization";
+import Migration "migration";
 
+(with migration = Migration.run)
 actor {
   type ReservationId = Nat;
 
@@ -91,17 +93,17 @@ actor {
     };
   };
 
-  stable var events = Map.empty<Nat, Event>();
-  stable var nextEventId = 0;
+  var events = Map.empty<Nat, Event>();
+  var nextEventId = 0;
 
   // Separate stable map for per-event recipient usernames (avoids schema migration)
-  stable var eventRecipients = Map.empty<Nat, Text>();
+  var eventRecipients = Map.empty<Nat, Text>();
 
-  stable var reservations = Map.empty<Nat, Reservation>();
-  stable var nextReservationId = 0;
-  stable var recipientUsername = "Iluvlean";
+  var reservations = Map.empty<Nat, Reservation>();
+  var nextReservationId = 0;
+  var recipientUsername = "Iluvlean";
 
-  stable var userProfiles = Map.empty<Principal, UserProfile>();
+  var userProfiles = Map.empty<Principal, UserProfile>();
 
   let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
@@ -195,6 +197,14 @@ actor {
     let all = reservations.values().toArray();
     let mapped = all.filterMap(func(r : Reservation) : ?ReservationOutput { withEventDetails(r) });
     mapped.sort();
+  };
+
+
+  public query func getAllReservationsForEvent(eventId : Nat) : async [ReservationOutput] {
+    let filtered = reservations.values().toArray().filter(
+      func(r : Reservation) : Bool { r.eventId == eventId }
+    );
+    filtered.filterMap(func(r : Reservation) : ?ReservationOutput { withEventDetails(r) });
   };
 
   public query func getReservationsByUsername(imvuUsername : Text) : async [ReservationOutput] {

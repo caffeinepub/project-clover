@@ -1,24 +1,23 @@
 # Project Clover
 
 ## Current State
-After a user submits a reservation, a `ConfirmationBanner` is shown in-page with a generic "You're In! 🎉" message and confetti. There is no visual representation of the actual ticket they received.
+React ticket reservation platform for IMVU events. Backend uses `mo:core/Map` for stable storage of events, reservations, and recipient usernames. Frontend has retry logic for event upload (10 attempts). Event cards are styled as physical tickets. Admin panel has Ticket Holders tab with 5-second polling. `getAllReservationsForEvent` exists in `backend.ts` but is NOT implemented in `main.mo` — this causes a Candid mismatch. Event cards don't show per-event reservation counts.
 
 ## Requested Changes (Diff)
 
 ### Add
-- A `TicketPopup` modal/overlay that appears immediately after a successful reservation submission
-- The popup displays a styled physical-ticket visual showing: event title, date & time, location, price, ticket number (event ID), IMVU username, transaction note, barcode decoration, "ADMIT ONE", clover branding, and a perforated stub — matching the existing ticket card aesthetic
-- The popup includes an animated entrance (scale in from center)
-- A close/dismiss button on the popup
+- `getAllReservationsForEvent(eventId: Nat)` properly implemented in backend Motoko
+- Per-event reservation count shown live on event ticket cards (e.g. "3 reserved")
+- `useGetReservationsForEvent(eventId)` hook with 5-second polling
 
 ### Modify
-- `ReservationModal`: after `submitReservation` succeeds, instead of immediately calling `onSuccess()`, capture the reservation details and trigger the ticket popup to show. After the popup is closed, call `onSuccess()`.
-- Keep the existing `ConfirmationBanner` as-is but it can be shown after the ticket popup is dismissed
+- Backend regenerated cleanly to fix any Map API issues causing upload failures
+- Event cards show a live ticket count badge/indicator
 
 ### Remove
-- Nothing
+- Nothing removed
 
 ## Implementation Plan
-1. Create a `TicketPopup` component that takes `event`, `imvuUsername`, `reservationId`/ticket number as props and renders a full-screen overlay with a physical-ticket styled card
-2. In `ReservationModal`, after successful submission, store the submitted username and show the ticket popup instead of immediately calling `onSuccess()`
-3. When ticket popup is closed, call `onSuccess()` to proceed to the confirmation banner
+1. Regenerate backend Motoko with all existing functions + `getAllReservationsForEvent`
+2. Update `useQueries.ts` to add `useGetReservationsForEvent` hook with 5-second refetch
+3. Update event ticket cards in `App.tsx` to show live reservation count per event

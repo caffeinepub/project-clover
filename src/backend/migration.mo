@@ -1,16 +1,9 @@
 import Map "mo:core/Map";
+import Text "mo:core/Text";
 import Nat "mo:core/Nat";
-import Time "mo:core/Time";
+import Principal "mo:core/Principal";
 
 module {
-  type OldActor = {
-    events : Map.Map<Nat, OldEvent>;
-    reservations : Map.Map<Nat, Reservation>;
-    nextEventId : Nat;
-    nextReservationId : Nat;
-    recipientUsername : Text;
-  };
-
   type OldEvent = {
     id : Nat;
     title : Text;
@@ -19,50 +12,47 @@ module {
     price : Nat;
   };
 
-  public type Event = {
-    id : Nat;
-    title : Text;
-    date : Int;
-    location : Text;
-    price : Nat;
-    recipientUsername : Text;
-  };
-
-  public type ReservationStatus = {
+  type OldReservationStatus = {
     #pending;
     #approved;
     #rejected;
   };
 
-  public type Reservation = {
+  type OldReservation = {
     id : Nat;
     eventId : Nat;
     imvuUsername : Text;
     transactionNote : Text;
-    status : ReservationStatus;
-    submittedAt : Time.Time;
+    status : OldReservationStatus;
+    submittedAt : Int;
+  };
+
+  type OldUserProfile = {
+    name : Text;
+    imvuUsername : Text;
+  };
+
+  type OldActor = {
+    events : Map.Map<Nat, OldEvent>;
+    nextEventId : Nat;
+    eventRecipients : Map.Map<Nat, Text>;
+    reservations : Map.Map<Nat, OldReservation>;
+    nextReservationId : Nat;
+    recipientUsername : Text;
+    userProfiles : Map.Map<Principal, OldUserProfile>;
   };
 
   type NewActor = {
-    events : Map.Map<Nat, Event>;
-    reservations : Map.Map<Nat, Reservation>;
+    events : Map.Map<Nat, OldEvent>;
     nextEventId : Nat;
+    eventRecipients : Map.Map<Nat, Text>;
+    reservations : Map.Map<Nat, OldReservation>;
     nextReservationId : Nat;
     recipientUsername : Text;
+    userProfiles : Map.Map<Principal, OldUserProfile>;
   };
 
   public func run(old : OldActor) : NewActor {
-    let newEvents = old.events.map<Nat, OldEvent, Event>(
-      func(_id, oldEvent) {
-        {
-          oldEvent with
-          recipientUsername = old.recipientUsername;
-        };
-      }
-    );
-    {
-      old with
-      events = newEvents;
-    };
+    old;
   };
 };

@@ -170,3 +170,17 @@ export function useSetRecipientUsername() {
     },
   });
 }
+
+export function useGetReservationsForEvent(eventId: bigint | null) {
+  const { actor, isFetching } = useActor();
+  return useQuery({
+    queryKey: ["reservationsForEvent", eventId?.toString()],
+    queryFn: async () => {
+      if (!eventId) return [];
+      const resolvedActor = actor ?? (await createActorWithConfig());
+      return resolvedActor.getAllReservationsForEvent(eventId);
+    },
+    enabled: !isFetching && eventId !== null,
+    refetchInterval: 5000,
+  });
+}
