@@ -174,30 +174,34 @@ actor {
     };
   };
 
-  private func withEventDetails(reservation : Reservation) : ReservationOutput {
-    let event = switch (events.get(reservation.eventId)) {
-      case (?e) { e };
-      case (null) { Runtime.trap("Event not found for this reservation. ") };
-    };
-    {
-      id = reservation.id;
-      eventId = reservation.eventId;
-      imvuUsername = reservation.imvuUsername;
-      transactionNote = reservation.transactionNote;
-      status = reservation.status;
-      submittedAt = reservation.submittedAt;
-      eventDetails = withRecipient(event);
+  private func withEventDetails(reservation : Reservation) : ?ReservationOutput {
+    switch (events.get(reservation.eventId)) {
+      case (null) { null };
+      case (?event) {
+        ?{
+          id = reservation.id;
+          eventId = reservation.eventId;
+          imvuUsername = reservation.imvuUsername;
+          transactionNote = reservation.transactionNote;
+          status = reservation.status;
+          submittedAt = reservation.submittedAt;
+          eventDetails = withRecipient(event);
+        };
+      };
     };
   };
 
   public query func getAllReservations() : async [ReservationOutput] {
-    reservations.values().toArray().map(func(reservation) { withEventDetails(reservation) }).sort();
+    let all = reservations.values().toArray();
+    let mapped = all.filterMap(func(r : Reservation) : ?ReservationOutput { withEventDetails(r) });
+    mapped.sort();
   };
 
   public query func getReservationsByUsername(imvuUsername : Text) : async [ReservationOutput] {
-    reservations.values().toArray().filter(
+    let filtered = reservations.values().toArray().filter(
       func(reservation) { Text.equal(reservation.imvuUsername, imvuUsername) }
-    ).map(func(reservation) { withEventDetails(reservation) });
+    );
+    filtered.filterMap(func(r : Reservation) : ?ReservationOutput { withEventDetails(r) });
   };
 
   public query func getAllEvents() : async [EventWithRecipient] {
