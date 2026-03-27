@@ -418,6 +418,338 @@ function EventCard({
   );
 }
 
+// ── Ticket Popup ─────────────────────────────────────────────────────────────
+function TicketPopup({
+  event,
+  imvuUsername,
+  onDismiss,
+}: {
+  event: Event;
+  imvuUsername: string;
+  onDismiss: () => void;
+}) {
+  const { date, time } = formatDateShort(event.date);
+  return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      className="fixed inset-0 z-[200] flex items-center justify-center p-4"
+      style={{ background: "oklch(0 0 0 / 0.85)", backdropFilter: "blur(6px)" }}
+      onClick={onDismiss}
+    >
+      <motion.div
+        initial={{ scale: 0.8, opacity: 0, y: 40 }}
+        animate={{ scale: 1, opacity: 1, y: 0 }}
+        exit={{ scale: 0.85, opacity: 0, y: 20 }}
+        transition={{ type: "spring", stiffness: 280, damping: 22 }}
+        className="flex flex-col items-center gap-5 w-full max-w-md"
+        onClick={(e) => e.stopPropagation()}
+      >
+        {/* Heading */}
+        <motion.div
+          className="flex items-center gap-2"
+          initial={{ opacity: 0, y: -10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.2 }}
+        >
+          {["🎉a", "🍀b", "🎉c"].map((em, i) => (
+            <motion.span
+              key={em}
+              className="text-2xl"
+              animate={{ rotate: [0, 15, -15, 0], scale: [1, 1.2, 1] }}
+              transition={{
+                delay: i * 0.15,
+                duration: 1.2,
+                repeat: 2,
+                ease: "easeInOut",
+              }}
+            >
+              {em}
+            </motion.span>
+          ))}
+          <span
+            className="text-2xl font-bold tracking-widest uppercase"
+            style={{
+              fontFamily: "Cinzel, Georgia, serif",
+              color: "oklch(0.92 0.32 145)",
+              textShadow: "0 0 20px oklch(0.85 0.28 145 / 0.6)",
+            }}
+          >
+            YOUR TICKET
+          </span>
+          {["🎉d", "🍀e", "🎉f"].map((em, i) => (
+            <motion.span
+              key={em}
+              className="text-2xl"
+              animate={{ rotate: [0, -15, 15, 0], scale: [1, 1.2, 1] }}
+              transition={{
+                delay: i * 0.15 + 0.3,
+                duration: 1.2,
+                repeat: 2,
+                ease: "easeInOut",
+              }}
+            >
+              {em}
+            </motion.span>
+          ))}
+        </motion.div>
+
+        {/* The physical ticket */}
+        <div
+          className="relative flex rounded-2xl overflow-visible w-full"
+          style={{
+            background: "oklch(0.10 0.04 145)",
+            border: "2px solid oklch(0.85 0.28 145 / 0.5)",
+            boxShadow:
+              "0 0 60px oklch(0.85 0.28 145 / 0.35), 0 24px 60px oklch(0 0 0 / 0.7)",
+            minHeight: "190px",
+          }}
+        >
+          {/* Main body */}
+          <div className="relative flex-1 flex flex-col overflow-hidden rounded-l-2xl">
+            {/* Top color bar */}
+            <div
+              className="h-2 w-full shrink-0"
+              style={{
+                background:
+                  "linear-gradient(90deg, oklch(0.72 0.25 145), oklch(0.92 0.30 145), oklch(0.72 0.25 145))",
+              }}
+            />
+            {/* Dot texture */}
+            <div
+              className="absolute inset-0 pointer-events-none"
+              style={{
+                backgroundImage:
+                  "radial-gradient(circle, oklch(0.85 0.28 145) 1px, transparent 1px)",
+                backgroundSize: "20px 20px",
+                opacity: 0.04,
+              }}
+            />
+            {/* Watermark */}
+            <div
+              className="absolute right-8 top-1/2 -translate-y-1/2 text-8xl pointer-events-none select-none"
+              style={{ opacity: 0.05 }}
+            >
+              🍀
+            </div>
+
+            {/* Content */}
+            <div className="flex flex-col flex-1 px-5 py-4 gap-2.5">
+              <div className="flex items-center gap-2">
+                <span
+                  className="text-[9px] font-bold uppercase tracking-[0.2em] px-2 py-0.5 rounded"
+                  style={{
+                    background: "oklch(0.85 0.28 145 / 0.12)",
+                    color: "oklch(0.85 0.28 145 / 0.8)",
+                    border: "1px solid oklch(0.85 0.28 145 / 0.25)",
+                  }}
+                >
+                  ADMIT ONE
+                </span>
+              </div>
+
+              <h3
+                className="text-xl font-bold leading-tight"
+                style={{
+                  fontFamily: "Cinzel, Georgia, serif",
+                  color: "oklch(0.95 0.02 85)",
+                  textShadow: "0 0 20px oklch(0.85 0.28 145 / 0.2)",
+                }}
+              >
+                {event.title}
+              </h3>
+
+              <div className="space-y-1.5">
+                <div className="flex items-center gap-1.5">
+                  <CalendarDays
+                    className="w-3.5 h-3.5 shrink-0"
+                    style={{ color: "oklch(0.85 0.28 145)" }}
+                  />
+                  <span className="text-xs text-muted-foreground">
+                    {date}{" "}
+                    <span
+                      className="font-semibold"
+                      style={{ color: "oklch(0.88 0.16 85)" }}
+                    >
+                      @ {time}
+                    </span>
+                  </span>
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <MapPin
+                    className="w-3.5 h-3.5 shrink-0"
+                    style={{ color: "oklch(0.85 0.28 145)" }}
+                  />
+                  <span className="text-xs text-muted-foreground">
+                    {event.location}
+                  </span>
+                </div>
+              </div>
+
+              <div className="flex items-center justify-between mt-auto gap-3">
+                <div
+                  className="px-3 py-1.5 rounded-xl flex-1"
+                  style={{
+                    background: "oklch(0.85 0.28 145 / 0.08)",
+                    border: "1px solid oklch(0.85 0.28 145 / 0.2)",
+                  }}
+                >
+                  <p className="text-[9px] uppercase tracking-wider text-muted-foreground">
+                    Ticket For
+                  </p>
+                  <p
+                    className="text-sm font-bold leading-none mt-0.5"
+                    style={{
+                      fontFamily: "Cinzel, Georgia, serif",
+                      color: "oklch(0.92 0.32 145)",
+                    }}
+                  >
+                    {imvuUsername}
+                  </p>
+                </div>
+                <div
+                  className="px-3 py-1.5 rounded-xl"
+                  style={{
+                    background: "oklch(0.85 0.28 145 / 0.08)",
+                    border: "1px solid oklch(0.85 0.28 145 / 0.2)",
+                  }}
+                >
+                  <p className="text-[9px] uppercase tracking-wider text-muted-foreground">
+                    Price
+                  </p>
+                  <p
+                    className="text-sm font-bold leading-none mt-0.5"
+                    style={{
+                      fontFamily: "Cinzel, Georgia, serif",
+                      color: "oklch(0.92 0.32 145)",
+                    }}
+                  >
+                    {event.price === 0n
+                      ? "Free"
+                      : `${event.price.toString()} cr`}
+                  </p>
+                </div>
+              </div>
+
+              <p
+                className="text-[10px] font-mono"
+                style={{ color: "oklch(0.85 0.28 145 / 0.55)" }}
+              >
+                TXN: CLOVER{event.id.toString()}
+              </p>
+            </div>
+          </div>
+
+          {/* Perforated divider */}
+          <div className="relative flex items-center justify-center w-5 shrink-0 z-10">
+            <div
+              className="absolute w-4 h-4 rounded-full z-20"
+              style={{
+                background: "oklch(0 0 0 / 0.85)",
+                border: "1px solid oklch(0.85 0.28 145 / 0.3)",
+                top: "-8px",
+              }}
+            />
+            <div
+              className="h-full"
+              style={{ borderLeft: "2px dashed oklch(0.85 0.28 145 / 0.35)" }}
+            />
+            <div
+              className="absolute w-4 h-4 rounded-full z-20"
+              style={{
+                background: "oklch(0 0 0 / 0.85)",
+                border: "1px solid oklch(0.85 0.28 145 / 0.3)",
+                bottom: "-8px",
+              }}
+            />
+          </div>
+
+          {/* Stub */}
+          <div
+            className="w-24 flex flex-col items-center justify-between py-4 px-2 rounded-r-2xl shrink-0"
+            style={{ background: "oklch(0.08 0.03 145)" }}
+          >
+            <span
+              className="text-[10px] font-mono tracking-widest"
+              style={{ color: "oklch(0.85 0.28 145 / 0.7)" }}
+            >
+              #{event.id.toString().padStart(3, "0")}
+            </span>
+            <motion.div
+              className="text-4xl select-none"
+              style={{
+                filter: "drop-shadow(0 0 10px oklch(0.85 0.28 145 / 0.5))",
+              }}
+              animate={{ rotate: [0, 10, -10, 0], scale: [1, 1.1, 1] }}
+              transition={{
+                duration: 3,
+                repeat: Number.POSITIVE_INFINITY,
+                ease: "easeInOut",
+              }}
+            >
+              🍀
+            </motion.div>
+            <div className="flex flex-col gap-[2px] w-14">
+              {[
+                "b1",
+                "b2",
+                "b3",
+                "b4",
+                "b5",
+                "b6",
+                "b7",
+                "b8",
+                "b9",
+                "b10",
+                "b11",
+                "b12",
+              ].map((k, i) => (
+                <div
+                  key={k}
+                  style={{
+                    height: "2px",
+                    width: `${[7, 5, 9, 6, 8, 4, 7, 5, 9, 3, 8, 6][i] * 7}%`,
+                    background: "oklch(0.85 0.28 145 / 0.4)",
+                    borderRadius: "1px",
+                  }}
+                />
+              ))}
+            </div>
+            <span
+              className="text-[8px] font-bold uppercase tracking-widest"
+              style={{ color: "oklch(0.85 0.28 145 / 0.5)" }}
+            >
+              ADMIT ONE
+            </span>
+          </div>
+        </div>
+
+        {/* Dismiss button */}
+        <motion.button
+          type="button"
+          className="px-8 py-3 rounded-2xl font-bold text-sm uppercase tracking-widest"
+          style={{
+            background:
+              "linear-gradient(135deg, oklch(0.90 0.30 145), oklch(0.78 0.28 145))",
+            color: "oklch(0.08 0.02 145)",
+            boxShadow: "0 0 30px oklch(0.85 0.28 145 / 0.4)",
+          }}
+          whileHover={{
+            scale: 1.05,
+            boxShadow: "0 0 40px oklch(0.85 0.28 145 / 0.6)",
+          }}
+          whileTap={{ scale: 0.95 }}
+          onClick={onDismiss}
+          data-ocid="ticket_popup.close_button"
+        >
+          🎉 Got it!
+        </motion.button>
+      </motion.div>
+    </motion.div>
+  );
+}
+
 // ── Reservation Modal ─────────────────────────────────────────────────────────
 function ReservationModal({
   event,
@@ -434,6 +766,8 @@ function ReservationModal({
 }) {
   const [imvuUsername, setImvuUsername] = useState("");
   const [transactionNote, setTransactionNote] = useState("");
+  const [ticketPopupOpen, setTicketPopupOpen] = useState(false);
+  const [submittedUsername, setSubmittedUsername] = useState("");
   const { mutateAsync: submitReservation, isPending } = useSubmitReservation();
 
   const handleSubmit = async () => {
@@ -448,9 +782,10 @@ function ReservationModal({
         imvuUsername: imvuUsername.trim().toLowerCase(),
         transactionNote: transactionNote.trim(),
       });
+      setSubmittedUsername(imvuUsername.trim().toLowerCase());
       setImvuUsername("");
       setTransactionNote("");
-      onSuccess();
+      setTicketPopupOpen(true);
     } catch {
       toast.error("Failed to submit reservation");
     }
@@ -459,168 +794,186 @@ function ReservationModal({
   if (!event) return null;
 
   return (
-    <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
-      <DialogContent
-        className="max-w-md w-full"
-        style={{
-          background: "oklch(0.09 0.03 145)",
-          border: "1px solid oklch(0.85 0.28 145 / 0.28)",
-          boxShadow:
-            "0 0 60px oklch(0.85 0.28 145 / 0.12), 0 24px 60px oklch(0 0 0 / 0.7)",
-        }}
-        data-ocid="reserve.dialog"
-      >
-        {/* Neon top bar */}
-        <div
-          className="absolute top-0 left-0 right-0 h-0.5 rounded-t-lg"
+    <>
+      <Dialog open={open} onOpenChange={(v) => !v && onClose()}>
+        <DialogContent
+          className="max-w-md w-full"
           style={{
-            background:
-              "linear-gradient(90deg, transparent, oklch(0.85 0.28 145), transparent)",
+            background: "oklch(0.09 0.03 145)",
+            border: "1px solid oklch(0.85 0.28 145 / 0.28)",
+            boxShadow:
+              "0 0 60px oklch(0.85 0.28 145 / 0.12), 0 24px 60px oklch(0 0 0 / 0.7)",
           }}
-        />
-
-        <DialogHeader className="pb-2">
-          <DialogTitle
-            className="text-xl font-bold"
-            style={{
-              fontFamily: "Cinzel, Georgia, serif",
-              color: "oklch(0.95 0.02 85)",
-            }}
-          >
-            Reserve Ticket
-          </DialogTitle>
-        </DialogHeader>
-
-        {/* Event summary */}
-        <div
-          className="rounded-xl p-3.5 mb-4"
-          style={{
-            background: "oklch(0.85 0.28 145 / 0.06)",
-            border: "1px solid oklch(0.85 0.28 145 / 0.18)",
-          }}
+          data-ocid="reserve.dialog"
         >
-          <p
-            className="font-bold text-base"
-            style={{
-              fontFamily: "Cinzel, Georgia, serif",
-              color: "oklch(0.92 0.32 145)",
-            }}
-          >
-            {event.title}
-          </p>
-          <p className="text-xs text-muted-foreground mt-1">
-            {formatDateTime(event.date)} · {event.location}
-          </p>
-          <p
-            className="text-sm font-bold mt-1.5"
-            style={{ color: "oklch(0.92 0.32 145)" }}
-          >
-            {event.price === 0n ? "Free" : `${event.price.toString()} credits`}
-          </p>
-        </div>
-
-        {/* Payment instructions */}
-        <div
-          className="rounded-xl p-3.5 mb-5 space-y-1.5"
-          style={{
-            background: "oklch(0.14 0.06 145)",
-            border: "1px solid oklch(0.85 0.28 145 / 0.22)",
-          }}
-        >
-          <p
-            className="text-xs font-semibold uppercase tracking-wider"
-            style={{ color: "oklch(0.92 0.32 145)" }}
-          >
-            💳 Payment Instructions
-          </p>
-          <p className="text-sm text-foreground">
-            Send credits via IMVU to:{" "}
-            <span
-              className="font-bold"
-              style={{ color: "oklch(0.92 0.32 145)" }}
-            >
-              {recipientUsername}
-            </span>
-          </p>
-          <p className="text-sm text-foreground">
-            Include note:{" "}
-            <span
-              className="font-bold"
-              style={{ color: "oklch(0.92 0.32 145)" }}
-            >
-              CLOVER{event.id.toString()}
-            </span>
-          </p>
-        </div>
-
-        {/* Form */}
-        <div className="space-y-3">
-          <div>
-            <label
-              htmlFor="imvu-username"
-              className="text-xs text-muted-foreground mb-1 block uppercase tracking-wider"
-            >
-              IMVU Username
-            </label>
-            <Input
-              id="imvu-username"
-              placeholder="Your IMVU username"
-              value={imvuUsername}
-              onChange={(e) => setImvuUsername(e.target.value)}
-              className="bg-input border-border text-foreground placeholder:text-muted-foreground"
-              data-ocid="reserve.username.input"
-            />
-          </div>
-          <div>
-            <label
-              htmlFor="txn-note"
-              className="text-xs text-muted-foreground mb-1 block uppercase tracking-wider"
-            >
-              Transaction Note / ID
-            </label>
-            <Input
-              id="txn-note"
-              placeholder={`e.g. CLOVER${event.id.toString()}`}
-              value={transactionNote}
-              onChange={(e) => setTransactionNote(e.target.value)}
-              className="bg-input border-border text-foreground placeholder:text-muted-foreground"
-              data-ocid="reserve.transaction_note.input"
-            />
-          </div>
-        </div>
-
-        <div className="mt-5 flex gap-3">
-          <Button
-            type="button"
-            variant="outline"
-            className="flex-1 border-border text-muted-foreground hover:text-foreground"
-            onClick={onClose}
-            data-ocid="reserve.cancel_button"
-          >
-            Cancel
-          </Button>
-          <Button
-            type="button"
-            className="flex-1 font-bold"
+          {/* Neon top bar */}
+          <div
+            className="absolute top-0 left-0 right-0 h-0.5 rounded-t-lg"
             style={{
               background:
-                "linear-gradient(135deg, oklch(0.90 0.30 145), oklch(0.78 0.28 145))",
-              color: "oklch(0.08 0.02 145)",
+                "linear-gradient(90deg, transparent, oklch(0.85 0.28 145), transparent)",
             }}
-            onClick={handleSubmit}
-            disabled={isPending}
-            data-ocid="reserve.submit_button"
+          />
+
+          <DialogHeader className="pb-2">
+            <DialogTitle
+              className="text-xl font-bold"
+              style={{
+                fontFamily: "Cinzel, Georgia, serif",
+                color: "oklch(0.95 0.02 85)",
+              }}
+            >
+              Reserve Ticket
+            </DialogTitle>
+          </DialogHeader>
+
+          {/* Event summary */}
+          <div
+            className="rounded-xl p-3.5 mb-4"
+            style={{
+              background: "oklch(0.85 0.28 145 / 0.06)",
+              border: "1px solid oklch(0.85 0.28 145 / 0.18)",
+            }}
           >
-            {isPending ? (
-              <Loader2 className="w-4 h-4 mr-2 animate-spin" />
-            ) : (
-              <Ticket className="w-4 h-4 mr-2" />
-            )}
-            {isPending ? "Submitting..." : "Submit Reservation"}
-          </Button>
-        </div>
-      </DialogContent>
-    </Dialog>
+            <p
+              className="font-bold text-base"
+              style={{
+                fontFamily: "Cinzel, Georgia, serif",
+                color: "oklch(0.92 0.32 145)",
+              }}
+            >
+              {event.title}
+            </p>
+            <p className="text-xs text-muted-foreground mt-1">
+              {formatDateTime(event.date)} · {event.location}
+            </p>
+            <p
+              className="text-sm font-bold mt-1.5"
+              style={{ color: "oklch(0.92 0.32 145)" }}
+            >
+              {event.price === 0n
+                ? "Free"
+                : `${event.price.toString()} credits`}
+            </p>
+          </div>
+
+          {/* Payment instructions */}
+          <div
+            className="rounded-xl p-3.5 mb-5 space-y-1.5"
+            style={{
+              background: "oklch(0.14 0.06 145)",
+              border: "1px solid oklch(0.85 0.28 145 / 0.22)",
+            }}
+          >
+            <p
+              className="text-xs font-semibold uppercase tracking-wider"
+              style={{ color: "oklch(0.92 0.32 145)" }}
+            >
+              💳 Payment Instructions
+            </p>
+            <p className="text-sm text-foreground">
+              Send credits via IMVU to:{" "}
+              <span
+                className="font-bold"
+                style={{ color: "oklch(0.92 0.32 145)" }}
+              >
+                {recipientUsername}
+              </span>
+            </p>
+            <p className="text-sm text-foreground">
+              Include note:{" "}
+              <span
+                className="font-bold"
+                style={{ color: "oklch(0.92 0.32 145)" }}
+              >
+                CLOVER{event.id.toString()}
+              </span>
+            </p>
+          </div>
+
+          {/* Form */}
+          <div className="space-y-3">
+            <div>
+              <label
+                htmlFor="imvu-username"
+                className="text-xs text-muted-foreground mb-1 block uppercase tracking-wider"
+              >
+                IMVU Username
+              </label>
+              <Input
+                id="imvu-username"
+                placeholder="Your IMVU username"
+                value={imvuUsername}
+                onChange={(e) => setImvuUsername(e.target.value)}
+                className="bg-input border-border text-foreground placeholder:text-muted-foreground"
+                data-ocid="reserve.username.input"
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="txn-note"
+                className="text-xs text-muted-foreground mb-1 block uppercase tracking-wider"
+              >
+                Transaction Note / ID
+              </label>
+              <Input
+                id="txn-note"
+                placeholder={`e.g. CLOVER${event.id.toString()}`}
+                value={transactionNote}
+                onChange={(e) => setTransactionNote(e.target.value)}
+                className="bg-input border-border text-foreground placeholder:text-muted-foreground"
+                data-ocid="reserve.transaction_note.input"
+              />
+            </div>
+          </div>
+
+          <div className="mt-5 flex gap-3">
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1 border-border text-muted-foreground hover:text-foreground"
+              onClick={onClose}
+              data-ocid="reserve.cancel_button"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              className="flex-1 font-bold"
+              style={{
+                background:
+                  "linear-gradient(135deg, oklch(0.90 0.30 145), oklch(0.78 0.28 145))",
+                color: "oklch(0.08 0.02 145)",
+              }}
+              onClick={handleSubmit}
+              disabled={isPending}
+              data-ocid="reserve.submit_button"
+            >
+              {isPending ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : (
+                <Ticket className="w-4 h-4 mr-2" />
+              )}
+              {isPending ? "Submitting..." : "Submit Reservation"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Ticket popup shown after successful reservation */}
+      <AnimatePresence>
+        {ticketPopupOpen && event && (
+          <TicketPopup
+            event={event}
+            imvuUsername={submittedUsername}
+            onDismiss={() => {
+              setTicketPopupOpen(false);
+              onSuccess();
+            }}
+          />
+        )}
+      </AnimatePresence>
+    </>
   );
 }
 
