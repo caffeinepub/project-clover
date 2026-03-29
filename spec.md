@@ -1,23 +1,29 @@
 # Project Clover
 
 ## Current State
-React ticket reservation platform for IMVU events. Backend uses `mo:core/Map` for stable storage of events, reservations, and recipient usernames. Frontend has retry logic for event upload (10 attempts). Event cards are styled as physical tickets. Admin panel has Ticket Holders tab with 5-second polling. `getAllReservationsForEvent` exists in `backend.ts` but is NOT implemented in `main.mo` — this causes a Candid mismatch. Event cards don't show per-event reservation counts.
+Admins can upload events with title, date, location, price, and recipientUsername. Events are stored in stable memory. Reservations reference eventId and dynamically join event details at query time via `withEventDetails`. There is no way to edit an event after upload.
 
 ## Requested Changes (Diff)
 
 ### Add
-- `getAllReservationsForEvent(eventId: Nat)` properly implemented in backend Motoko
-- Per-event reservation count shown live on event ticket cards (e.g. "3 reserved")
-- `useGetReservationsForEvent(eventId)` hook with 5-second polling
+- `updateEvent` backend function: admin can update event title, date, location, price, and recipientUsername after upload
+- Snapshot event details (title, date, location, price, recipientUsername) stored on each reservation at submission time so existing tickets are never affected by edits
+- Edit button on each event in the admin panel (opens a pre-filled form modal)
 
 ### Modify
-- Backend regenerated cleanly to fix any Map API issues causing upload failures
-- Event cards show a live ticket count badge/indicator
+- `Reservation` type: add optional snapshot fields `snapshotTitle`, `snapshotDate`, `snapshotLocation`, `snapshotPrice`, `snapshotRecipient` (optional to preserve existing data)
+- `submitReservation`: capture event snapshot at submission time
+- `ReservationOutput` / ticket popup: prefer snapshot fields over live event fields when present
+- `withEventDetails`: falls back to current event data if snapshot fields are null (backward compat)
 
 ### Remove
 - Nothing removed
 
 ## Implementation Plan
-1. Regenerate backend Motoko with all existing functions + `getAllReservationsForEvent`
-2. Update `useQueries.ts` to add `useGetReservationsForEvent` hook with 5-second refetch
-3. Update event ticket cards in `App.tsx` to show live reservation count per event
+1. Update `Reservation` stable type to include optional snapshot fields
+2. Add `updateEvent(id, input)` shared function to backend
+3. Update `submitReservation` to write snapshot fields from event at time of submission
+4. Update `withEventDetails` to use snapshot when available, fall back to live event
+5. Update `backend.d.ts` to expose `updateEvent`
+6. Frontend: add Edit button per event in admin panel, opens edit modal pre-filled with current event data
+7. Frontend: ticket popup reads snapshot fields from reservation (already returned in `eventDetails` via the fallback logic)

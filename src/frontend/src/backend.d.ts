@@ -54,6 +54,7 @@ export interface backendInterface {
     addEvent(input: EventInput): Promise<bigint>;
     assignCallerUserRole(user: Principal, role: UserRole): Promise<void>;
     deleteEvent(id: bigint): Promise<void>;
+    updateEvent(id: bigint, input: EventInput): Promise<void>;
     getAllEvents(): Promise<Array<EventWithRecipient>>;
     getAllReservations(): Promise<Array<ReservationOutput>>;
     getAllReservationsForEvent(eventId: bigint): Promise<Array<ReservationOutput>>;

@@ -14,7 +14,6 @@ import MixinAuthorization "authorization/MixinAuthorization";
 actor {
   type ReservationId = Nat;
 
-  // Stable Event type (original, no recipientUsername)
   public type Event = {
     id : Nat;
     title : Text;
@@ -31,7 +30,6 @@ actor {
     recipientUsername : Text;
   };
 
-  // Event with recipient for frontend responses
   public type EventWithRecipient = {
     id : Nat;
     title : Text;
@@ -47,6 +45,7 @@ actor {
     #rejected;
   };
 
+  // Unchanged — preserves stable variable compatibility
   public type Reservation = {
     id : ReservationId;
     eventId : Nat;
@@ -54,6 +53,15 @@ actor {
     transactionNote : Text;
     status : ReservationStatus;
     submittedAt : Time.Time;
+  };
+
+  // Snapshot stored separately so existing stable var is untouched
+  public type EventSnapshot = {
+    title : Text;
+    date : Int;
+    location : Text;
+    price : Nat;
+    recipientUsername : Text;
   };
 
   public type ReservationUpdate = {
@@ -93,7 +101,7 @@ actor {
     };
   };
 
-  // STABLE variables — data persists across canister upgrades and restarts
+  // STABLE variables
   stable var events = Map.empty<Nat, Event>();
   stable var nextEventId = 0;
   stable var eventRecipients = Map.empty<Nat, Text>();
@@ -101,6 +109,8 @@ actor {
   stable var nextReservationId = 0;
   stable var recipientUsername = "Iluvlean";
   stable var userProfiles = Map.empty<Principal, UserProfile>();
+  // New stable map for reservation snapshots — starts empty, populated for new reservations
+  stable var reservationSnapshots = Map.empty<Nat, EventSnapshot>();
 
   let accessControlState = AccessControl.initState();
   include MixinAuthorization(accessControlState);
@@ -148,6 +158,24 @@ actor {
     eventId;
   };
 
+  public shared func updateEvent(id : Nat, input : EventInput) : async () {
+    switch (events.get(id)) {
+      case (null) { Runtime.trap("Event not found.") };
+      case (?existing) {
+        let updated : Event = {
+          id = existing.id;
+          title = input.title;
+          date = input.date;
+          location = input.location;
+          price = input.price;
+        };
+        events.add(id, updated);
+        let recipient = if (input.recipientUsername == "") { recipientUsername } else { input.recipientUsername };
+        eventRecipients.add(id, recipient);
+      };
+    };
+  };
+
   public shared func deleteEvent(id : Nat) : async () {
     events.remove(id);
     eventRecipients.remove(id);
@@ -156,7 +184,7 @@ actor {
   public func submitReservation(eventId : Nat, imvuUsername : Text, transactionNote : Text) : async Nat {
     switch (events.get(eventId)) {
       case (null) { Runtime.trap("Could not find event. ") };
-      case (_) {
+      case (?event) {
         let reservationId = nextReservationId;
         nextReservationId += 1;
         let reservation : Reservation = {
@@ -168,15 +196,70 @@ actor {
           submittedAt = Time.now();
         };
         reservations.add(reservationId, reservation);
+        // Snapshot the event details at submission time
+        let recipient = switch (eventRecipients.get(eventId)) {
+          case (?r) { r };
+          case (null) { recipientUsername };
+        };
+        let snapshot : EventSnapshot = {
+          title = event.title;
+          date = event.date;
+          location = event.location;
+          price = event.price;
+          recipientUsername = recipient;
+        };
+        reservationSnapshots.add(reservationId, snapshot);
         reservationId;
       };
     };
   };
 
+  // Build ReservationOutput: use snapshot when available, fall back to current event
   private func withEventDetails(reservation : Reservation) : ?ReservationOutput {
+    let snapOpt = reservationSnapshots.get(reservation.id);
     switch (events.get(reservation.eventId)) {
-      case (null) { null };
+      case (null) {
+        // Event deleted — use snapshot if we have one
+        switch (snapOpt) {
+          case (null) { null };
+          case (?snap) {
+            ?{
+              id = reservation.id;
+              eventId = reservation.eventId;
+              imvuUsername = reservation.imvuUsername;
+              transactionNote = reservation.transactionNote;
+              status = reservation.status;
+              submittedAt = reservation.submittedAt;
+              eventDetails = {
+                id = reservation.eventId;
+                title = snap.title;
+                date = snap.date;
+                location = snap.location;
+                price = snap.price;
+                recipientUsername = snap.recipientUsername;
+              };
+            };
+          };
+        };
+      };
       case (?event) {
+        // Prefer snapshot fields so existing tickets are unaffected by edits
+        let details = switch (snapOpt) {
+          case (?snap) {
+            {
+              id = event.id;
+              title = snap.title;
+              date = snap.date;
+              location = snap.location;
+              price = snap.price;
+              recipientUsername = snap.recipientUsername;
+            };
+          };
+          case (null) {
+            // Old reservation with no snapshot — use live event data
+            withRecipient(event);
+          };
+        };
         ?{
           id = reservation.id;
           eventId = reservation.eventId;
@@ -184,7 +267,7 @@ actor {
           transactionNote = reservation.transactionNote;
           status = reservation.status;
           submittedAt = reservation.submittedAt;
-          eventDetails = withRecipient(event);
+          eventDetails = details;
         };
       };
     };
@@ -195,7 +278,6 @@ actor {
     let mapped = all.filterMap(func(r : Reservation) : ?ReservationOutput { withEventDetails(r) });
     mapped.sort();
   };
-
 
   public query func getAllReservationsForEvent(eventId : Nat) : async [ReservationOutput] {
     let filtered = reservations.values().toArray().filter(

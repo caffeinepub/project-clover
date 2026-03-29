@@ -145,6 +145,20 @@ export function useDeleteEvent() {
   });
 }
 
+export function useUpdateEvent() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async ({ id, input }: { id: bigint; input: EventInput }) => {
+      const resolvedActor = await createActorWithConfig();
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      return (resolvedActor as any).updateEvent(id, input);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["getAllEvents"] });
+    },
+  });
+}
+
 export function useGetRecipientUsername() {
   const { actor, isFetching } = useActor();
   return useQuery({

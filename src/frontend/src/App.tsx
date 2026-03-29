@@ -24,6 +24,7 @@ import {
   ChevronRight,
   Loader2,
   MapPin,
+  Pencil,
   Plus,
   Search,
   Settings,
@@ -49,6 +50,7 @@ import {
   useGetRecipientUsername,
   useSetRecipientUsername,
   useSubmitReservation,
+  useUpdateEvent,
   useUpdateReservation,
 } from "./hooks/useQueries";
 
@@ -1207,6 +1209,7 @@ function ManageEventsTab() {
   const { data: events, isLoading: eventsLoading } = useGetAllEvents();
   const { mutateAsync: addEvent } = useAddEvent();
   const { mutateAsync: deleteEvent } = useDeleteEvent();
+  const { mutateAsync: updateEvent } = useUpdateEvent();
   const { data: fetchedRecipient = "" } = useGetRecipientUsername();
   const [title, setTitle] = useState("");
   const [dateTime, setDateTime] = useState("");
@@ -1215,6 +1218,62 @@ function ManageEventsTab() {
   const [sendCreditsTo, setSendCreditsTo] = useState("");
   const [adding, setAdding] = useState(false);
   const [deletingId, setDeletingId] = useState<bigint | null>(null);
+  const [editingEvent, setEditingEvent] = useState<Event | null>(null);
+  const [editTitle, setEditTitle] = useState("");
+  const [editDateTime, setEditDateTime] = useState("");
+  const [editLocation, setEditLocation] = useState("");
+  const [editPrice, setEditPrice] = useState("");
+  const [editSendCreditsTo, setEditSendCreditsTo] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const openEdit = (ev: Event) => {
+    setEditingEvent(ev);
+    setEditTitle(ev.title);
+    setEditDateTime(
+      new Date(Number(ev.date / 1_000_000n)).toISOString().slice(0, 16),
+    );
+    setEditLocation(ev.location);
+    setEditPrice(ev.price.toString());
+    setEditSendCreditsTo(ev.recipientUsername);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!editingEvent) return;
+    if (!editTitle || !editDateTime || !editLocation || !editPrice) {
+      toast.error("Please fill in all fields");
+      return;
+    }
+    const dateMs = new Date(editDateTime).getTime();
+    if (Number.isNaN(dateMs)) {
+      toast.error("Invalid date");
+      return;
+    }
+    setSaving(true);
+    const priceNum = Number.parseFloat(editPrice);
+    const priceBigInt = Number.isNaN(priceNum)
+      ? 0n
+      : BigInt(Math.round(priceNum));
+    try {
+      await updateEvent({
+        id: editingEvent.id,
+        input: {
+          title: editTitle,
+          date: BigInt(dateMs) * 1_000_000n,
+          location: editLocation,
+          price: priceBigInt,
+          recipientUsername:
+            editSendCreditsTo || fetchedRecipient || "Iluvlean",
+        },
+      });
+      toast.success("Event updated!");
+      setEditingEvent(null);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      toast.error(`Update failed: ${msg}`);
+    } finally {
+      setSaving(false);
+    }
+  };
 
   useEffect(() => {
     if (fetchedRecipient) setSendCreditsTo(fetchedRecipient);
@@ -1455,25 +1514,183 @@ function ManageEventsTab() {
                   {formatDateTime(ev.date)} · {ev.location}
                 </p>
               </div>
-              <Button
-                type="button"
-                size="sm"
-                variant="destructive"
-                className="opacity-70 hover:opacity-100 shrink-0"
-                onClick={() => handleDelete(ev.id)}
-                disabled={deletingId === ev.id}
-                data-ocid={`admin.event.delete_button.${i + 1}`}
-              >
-                {deletingId === ev.id ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <Trash2 className="w-4 h-4" />
-                )}
-              </Button>
+              <div className="flex items-center gap-2 shrink-0">
+                <Button
+                  type="button"
+                  size="sm"
+                  className="opacity-80 hover:opacity-100"
+                  style={{
+                    background: "oklch(0.85 0.28 145 / 0.20)",
+                    color: "oklch(0.92 0.32 145)",
+                    border: "1px solid oklch(0.85 0.28 145 / 0.35)",
+                  }}
+                  onClick={() => openEdit(ev)}
+                  data-ocid={`admin.event.edit_button.${i + 1}`}
+                >
+                  <Pencil className="w-4 h-4" />
+                </Button>
+                <Button
+                  type="button"
+                  size="sm"
+                  variant="destructive"
+                  className="opacity-70 hover:opacity-100"
+                  onClick={() => handleDelete(ev.id)}
+                  disabled={deletingId === ev.id}
+                  data-ocid={`admin.event.delete_button.${i + 1}`}
+                >
+                  {deletingId === ev.id ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Trash2 className="w-4 h-4" />
+                  )}
+                </Button>
+              </div>
             </div>
           ))}
         </div>
       )}
+      {/* Edit Event Modal */}
+      <Dialog
+        open={!!editingEvent}
+        onOpenChange={(open) => {
+          if (!open) setEditingEvent(null);
+        }}
+      >
+        <DialogContent
+          className="max-w-lg"
+          style={{
+            background: "oklch(0.10 0.04 145)",
+            border: "1px solid oklch(0.85 0.28 145 / 0.30)",
+          }}
+          data-ocid="admin.edit_event.dialog"
+        >
+          <DialogHeader>
+            <DialogTitle
+              style={{
+                color: "oklch(0.95 0.02 85)",
+                fontFamily: "Cinzel, Georgia, serif",
+              }}
+            >
+              Edit Event
+            </DialogTitle>
+          </DialogHeader>
+          <div className="grid grid-cols-1 gap-3 mt-2">
+            <div>
+              <label
+                htmlFor="edit-title"
+                className="text-xs text-muted-foreground mb-1 block uppercase tracking-wider"
+              >
+                Event Title
+              </label>
+              <Input
+                id="edit-title"
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                className="bg-input border-border"
+                data-ocid="admin.edit_event_title.input"
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="edit-date"
+                className="text-xs text-muted-foreground mb-1 block uppercase tracking-wider"
+              >
+                Date & Time
+              </label>
+              <Input
+                id="edit-date"
+                type="datetime-local"
+                value={editDateTime}
+                onChange={(e) => setEditDateTime(e.target.value)}
+                className="bg-input border-border"
+                style={{ colorScheme: "dark" }}
+                data-ocid="admin.edit_event_date.input"
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="edit-location"
+                className="text-xs text-muted-foreground mb-1 block uppercase tracking-wider"
+              >
+                Location
+              </label>
+              <Input
+                id="edit-location"
+                value={editLocation}
+                onChange={(e) => setEditLocation(e.target.value)}
+                className="bg-input border-border"
+                data-ocid="admin.edit_event_location.input"
+              />
+            </div>
+            <div>
+              <label
+                htmlFor="edit-price"
+                className="text-xs text-muted-foreground mb-1 block uppercase tracking-wider"
+              >
+                Price
+              </label>
+              <Input
+                id="edit-price"
+                value={editPrice}
+                onChange={(e) => setEditPrice(e.target.value)}
+                className="bg-input border-border"
+                data-ocid="admin.edit_event_price.input"
+              />
+            </div>
+            <div
+              className="rounded-xl p-3"
+              style={{
+                background: "oklch(0.85 0.28 145 / 0.06)",
+                border: "1px solid oklch(0.85 0.28 145 / 0.22)",
+              }}
+            >
+              <label
+                htmlFor="edit-credits-to"
+                className="text-xs font-bold mb-1 block uppercase tracking-wider"
+                style={{ color: "oklch(0.92 0.32 145)" }}
+              >
+                Send Credits To (IMVU Username)
+              </label>
+              <Input
+                id="edit-credits-to"
+                value={editSendCreditsTo}
+                onChange={(e) => setEditSendCreditsTo(e.target.value)}
+                className="bg-input border-border"
+                data-ocid="admin.edit_send_credits_to.input"
+              />
+            </div>
+          </div>
+          <div className="flex gap-3 mt-4">
+            <Button
+              type="button"
+              variant="outline"
+              className="flex-1"
+              onClick={() => setEditingEvent(null)}
+              disabled={saving}
+              data-ocid="admin.edit_event.cancel_button"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              className="flex-1 font-bold"
+              style={{
+                background:
+                  "linear-gradient(135deg, oklch(0.90 0.30 145), oklch(0.78 0.28 145))",
+                color: "oklch(0.08 0.02 145)",
+              }}
+              onClick={handleSaveEdit}
+              disabled={saving}
+              data-ocid="admin.edit_event.save_button"
+            >
+              {saving ? (
+                <Loader2 className="w-4 h-4 mr-2 animate-spin" />
+              ) : null}
+              {saving ? "Saving..." : "Save Changes"}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
