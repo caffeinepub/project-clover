@@ -149,6 +149,7 @@ export interface backendInterface {
     saveCallerUserProfile(profile: UserProfile): Promise<void>;
     setRecipientUsername(username: string): Promise<void>;
     submitReservation(eventId: bigint, imvuUsername: string, transactionNote: string): Promise<bigint>;
+    updateEvent(id: bigint, input: EventInput): Promise<void>;
     updateReservation(request: ReservationUpdate): Promise<void>;
 }
 import type { EventWithRecipient as _EventWithRecipient, ReservationOutput as _ReservationOutput, ReservationStatus as _ReservationStatus, ReservationUpdate as _ReservationUpdate, Time as _Time, UserProfile as _UserProfile, UserRole as _UserRole } from "./declarations/backend.did.d.ts";
@@ -207,6 +208,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.deleteEvent(arg0);
+            return result;
+        }
+    }
+    async updateEvent(arg0: bigint, arg1: EventInput): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.updateEvent(arg0, arg1);
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.updateEvent(arg0, arg1);
             return result;
         }
     }

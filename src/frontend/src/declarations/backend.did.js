@@ -57,6 +57,7 @@ export const idlService = IDL.Service({
   'addEvent' : IDL.Func([EventInput], [IDL.Nat], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
   'deleteEvent' : IDL.Func([IDL.Nat], [], []),
+  'updateEvent' : IDL.Func([IDL.Nat, EventInput], [], []),
   'getAllEvents' : IDL.Func([], [IDL.Vec(EventWithRecipient)], ['query']),
   'getAllReservations' : IDL.Func([], [IDL.Vec(ReservationOutput)], ['query']),
   'getCallerUserProfile' : IDL.Func([], [IDL.Opt(UserProfile)], ['query']),
@@ -131,6 +132,7 @@ export const idlFactory = ({ IDL }) => {
     'addEvent' : IDL.Func([EventInput], [IDL.Nat], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
     'deleteEvent' : IDL.Func([IDL.Nat], [], []),
+  'updateEvent' : IDL.Func([IDL.Nat, EventInput], [], []),
     'getAllEvents' : IDL.Func([], [IDL.Vec(EventWithRecipient)], ['query']),
     'getAllReservations' : IDL.Func(
         [],

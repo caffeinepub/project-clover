@@ -151,7 +151,7 @@ export function useUpdateEvent() {
     mutationFn: async ({ id, input }: { id: bigint; input: EventInput }) => {
       const resolvedActor = await createActorWithConfig();
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      return (resolvedActor as any).updateEvent(id, input);
+      return resolvedActor.updateEvent(id, input);
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["getAllEvents"] });

@@ -51,6 +51,7 @@ export interface _SERVICE {
   'addEvent' : ActorMethod<[EventInput], bigint>,
   'assignCallerUserRole' : ActorMethod<[Principal, UserRole], undefined>,
   'deleteEvent' : ActorMethod<[bigint], undefined>,
+  'updateEvent' : ActorMethod<[bigint, EventInput], undefined>,
   'getAllEvents' : ActorMethod<[], Array<EventWithRecipient>>,
   'getAllReservations' : ActorMethod<[], Array<ReservationOutput>>,
   'getAllReservationsForEvent' : ActorMethod<[bigint], Array<ReservationOutput>>,
